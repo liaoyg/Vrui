@@ -215,10 +215,6 @@ void main(void)
         rayEnd = (1.0/boxDim)*(rayEnd - boxMin);
 
         vec4 col_acc = vec4(0,0,0,0); // The dest color
-//        if(isBorder(rayStart,rayEnd))
-//            col_acc = vec4(1.0, 1.0, 0.0, 1.0);
-
-//        vec3 originStart = rayStart;
 
         vec3 rayDir = rayEnd - rayStart;
         float len = length(rayDir);
@@ -227,40 +223,6 @@ void main(void)
         //clipping
         vec3 clipPlane = p2cart(azimuth, elevation);
 
-        if (clipFlag)
-            {
-                //next, see if clip plane faces viewer
-                bool frontface = (dot(rayDir , clipPlane) > 0.0);
-                //next, distance from ray origin to clip plane
-                float dis = dot(rayDir,clipPlane);
-//                vec3 center = vec3(rayStart.x - 0.5, rayStart.y - 0.5, rayStart.x -0.5);
-                if (dis != 0.0  )
-                    dis = (-clipPlaneDepth - dot(clipPlane, rayStart.xyz-0.5)) / dis;
-                if ((!frontface) && (dis < 0.0))
-                    return;
-                if ((frontface) && (dis > len))
-                    return;
-                if ((dis > 0.0) && (dis < len))
-                {
-                    if (frontface)
-                    {
-                        rayStart = rayStart + rayDir * dis;
-                    }
-                    else
-                    {
-                        rayEnd =  rayStart + rayDir * dis;
-                    }
-                rayDir = rayEnd - rayStart;
-                len = length(rayDir);
-                rayDir = normalize(rayDir);
-                }
-//                vec3 newStart, newEnd, newDir;
-//                clipping(rayStart, rayEnd,rayDir,newStart, newEnd, newDir);
-//                rayStart = newStart;
-//                rayEnd = newEnd;
-//                rayDir = newDir;
-//                len = length(rayDir);
-            }
 
         //lighting
         vec3 Ambient = ambient;
@@ -298,48 +260,7 @@ void main(void)
 
             //lighting
             float laoValue = texture(LAOTex,rayStart).r;
-//            Ambient = Ambient * laoValue;
-//            if(lighttype == 0)
-//            {
-//                vec3 Normal = sampleGrad(volumeTex,rayStart);
-//                float diffuse = max(0.0, dot(Normal, LightPosition));
-//                float specular = max(0.0, dot(Normal, HalfVector));
-//                // surfaces facing away from the light (negative dot products)
-//                // won’t be lit by the directional light
-//                if (diffuse == 0.0)
-//                   specular = 0.0;
-//                else
-//                    specular = pow(specular, Shininess);
-//                // sharpen the highlight
-//                vec3 scatteredLight = Ambient + LightColor * diffuse;
-//                vec3 reflectedLight = LightColor * specular * Strength;
 
-//                color_sample.rgb = min(color_sample.rgb * scatteredLight + reflectedLight, vec3(1.0));
-//            }
-//            else if(lighttype == 1)
-//            {
-//                vec3 Normal = sampleGrad(volumeTex,rayStart);
-//                vec3 lightDirection = LightPosition - vec3(rayStart);
-//                float lightDistance = length(lightDirection);
-//                lightDirection = lightDirection / lightDistance;
-
-//                float attenuation = 1.0 /
-//                                 (ConstantAttenuation +
-//                                    LinearAttenuation * lightDistance +
-//                                 QuadraticAttenuation * lightDistance * lightDistance);
-//                HalfVector = normalize(lightDirection + CameraDir);
-
-//                float diffuse = max(0.0, dot(Normal, lightDirection));
-//                float specular = max(0.0, dot(Normal, HalfVector));
-
-//                if (diffuse == 0.0)
-//                    specular = 0.0;
-//                else
-//                    specular = pow(specular, Shininess)*Strength;
-//                vec3 scatteredLight = Ambient + LightColor * diffuse * attenuation;
-//                vec3 reflectedLight = LightColor * specular * attenuation;
-//                color_sample.rgb = min(color_sample.rgb * scatteredLight + reflectedLight, vec3(1.0));
-//            }
             if(lighttype == 3)
             {
                 float lightIntensity = getLightIntensity(sampleGrad(volumeTex,rayStart), rayStart);
