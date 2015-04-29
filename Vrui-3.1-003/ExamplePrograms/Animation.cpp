@@ -268,7 +268,7 @@ void Animation::initContext(GLContextData& contextData) const
 	{
 	/* Create a context data item: */
 	DataItem* dataItem=new DataItem;
-	contextData.addDataItem(this,dataItem);
+    contextData.addDataItem(this,dataItem);
 	
 	/* Initialize the index buffer: */
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,dataItem->indexBufferId);
