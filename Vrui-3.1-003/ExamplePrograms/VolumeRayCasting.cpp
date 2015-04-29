@@ -64,6 +64,8 @@ VolumeRayCasting::VolumeRayCasting(int& argc, char**& argv)
   VolumeDim = Vector3i(32, 32, 32);
   // prepare transfer function data
   transFuncData.clear();
+  //debug
+  std::cout<<"initial transferfunction"<<std::endl;
   for(int i = 0; i< 512; i++)
     {
       if(i < 64)
@@ -120,7 +122,8 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
 	
   /* Protect the Volume Rendering texture object: */
   glBindTexture(GL_TEXTURE_3D,0);
-
+  //debug
+  std::cout<<dataItem->volumeTex<<std::endl;
   /* Select the Tansfer Function texture object: */
   glBindTexture(GL_TEXTURE_2D,dataItem->transferFuncTex);
 	
@@ -133,6 +136,8 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
 	
   /* Protect the Tansfer Function texture object: */
   glBindTexture(GL_TEXTURE_2D,0);
+  //debug
+  std::cout<<dataItem->transferFuncTex<<std::endl;
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glEnable(GL_BLEND);
@@ -155,6 +160,14 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
 	glDeleteObjectARB(fragmentShader);
       }	
     }
+  GLuint index = glGetAttribLocationARB(dataItem->rayCastingShader, "Vertex");
+  glGenVertexArrays(1,&(dataItem->rectVerticesArrayId));
+  glBindVertexArray(dataItem->rectVerticesArrayId);
+  glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
+  glEnableVertexAttribArrayARB(index);
+  glVertexAttribPointerARB(index,2, GL_FLOAT,false,0,NULL);
+  glBindVertexArray(0);
+  glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
   std::vector<Vector2f> rectVertices;
   rectVertices.push_back(Vector2f(0.0f,0.0f));
@@ -165,20 +178,17 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
   glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
   glBufferDataARB(GL_ARRAY_BUFFER, rectVertices.size()*sizeof(Vector2f), &rectVertices.front(),GL_STATIC_DRAW);
   glBindBufferARB(GL_ARRAY_BUFFER, 0);
-  glGenVertexArrays(1,&(dataItem->rectVerticesArrayId));
-  GLuint index = glGetAttribLocationARB(dataItem->rayCastingShader, "Vertex");
-  glBindVertexArray(dataItem->rectVerticesArrayId);
-  glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
-  glEnableVertexAttribArrayARB(index);
-  glVertexAttribPointerARB(index,2, GL_FLOAT,false,0,NULL);
-  glBindVertexArray(0);
-  glBindBufferARB(GL_ARRAY_BUFFER, 0);
-  
+
+  //debug
+  std::cout<<"initial 1"<<std::endl;
+
   glNewList(dataItem->displayListIds[0],GL_COMPILE);
   glBindVertexArray(dataItem->rectVerticesArrayId);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   glBindVertexArray(0);
   glEndList();
+  //debug
+  std::cout<<"initial finish"<<std::endl;
 
 }
 
