@@ -13,6 +13,7 @@
 #include <GL/Extensions/GLARBFragmentShader.h>
 #include <GL/Extensions/GLEXTGpuShader4.h>
 #include "VolumeRayCasting.h"
+#include <errno.h>
 
 
 VolumeRayCasting::DataItem::DataItem(void)
@@ -89,16 +90,18 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
 {
   DataItem* dataItem=new DataItem();
   contextData.addDataItem(this,dataItem);
-  
-  std::string datasetName = "data/BostonTeapot.raw";
-  int volumesize = 32*32*32;
+
+  const char* datasetName = "bin/data/BostonTeapot.raw";
+  int volumesize = 256*256*256;
   /*load sample data*/
   std::vector<unsigned char> volumeData;
   volumeData.resize(volumesize);
-  std::ifstream ifs(datasetName.c_str(), std::ios::binary);
+  std::ifstream ifs(datasetName, std::ios::binary);
+
   if(!ifs.is_open())
     {
       /* fail to open dataset file */
+      std::cout<<"fail to open dataset file: "<<strerror(errno)<<std::endl;
       return;
     }
   ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize * sizeof(float));
@@ -145,8 +148,8 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
   if(dataItem->haveShaders)
     {
       {
-	GLhandleARB vertexShader=glCompileVertexShaderFromFile("Shaders/VolumeRayCasting.vert");
-	GLhandleARB fragmentShader=glCompileFragmentShaderFromFile("Shaders/VolumeRayCasting.frag");
+    GLhandleARB vertexShader=glCompileVertexShaderFromFile("bin/Shaders/VolumeRayCasting.vert");
+    GLhandleARB fragmentShader=glCompileFragmentShaderFromFile("bin/Shaders/VolumeRayCasting.frag");
 	dataItem->rayCastingShader=glLinkShader(vertexShader,fragmentShader);
 	glDeleteObjectARB(vertexShader);
 	glDeleteObjectARB(fragmentShader);
@@ -176,6 +179,7 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   glBindVertexArray(0);
   glEndList();
+
 }
 
 void VolumeRayCasting::SetTexture(GLuint shaderId, const GLchar *name, GLuint texture, GLenum type)
