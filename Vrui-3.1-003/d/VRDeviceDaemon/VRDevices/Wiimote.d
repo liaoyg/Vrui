@@ -1,0 +1,24 @@
+$(OBJDIR)/VRDeviceDaemon/VRDevices/Wiimote.o: \
+ VRDeviceDaemon/VRDevices/Wiimote.cpp  \
+ /home/leo/src/Vrui-3.1-003/VRDeviceDaemon/VRDevices/Wiimote.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CallbackData.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CallbackList.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Mutex.h  \
+ /home/leo/src/Vrui-3.1-003/Threads/Config.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Cond.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Time.h  \
+ /home/leo/src/Vrui-3.1-003/Threads/MutexCond.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Thread.h \
+ /home/leo/src/Vrui-3.1-003/Math/BrokenLine.h \
+ /home/leo/src/Vrui-3.1-003/Math/Math.h  \
+ /home/leo/src/Vrui-3.1-003/Geometry/Vector.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/ComponentArray.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/Misc/StandardValueCoders.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ValueCoder.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CompoundValueCoders.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CompoundValueCoders.icpp \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.icpp \
+ /home/leo/src/Vrui-3.1-003/Misc/StringMarshaller.h \
+ /home/leo/src/Vrui-3.1-003/Math/MathValueCoders.h

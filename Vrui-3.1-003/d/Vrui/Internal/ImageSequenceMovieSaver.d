@@ -1,0 +1,21 @@
+$(OBJDIR)/Vrui/Internal/ImageSequenceMovieSaver.o: \
+ Vrui/Internal/ImageSequenceMovieSaver.cpp  \
+ /home/leo/src/Vrui-3.1-003/Vrui/Internal/ImageSequenceMovieSaver.h \
+ /home/leo/src/Vrui-3.1-003/Threads/MutexCond.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Time.h  \
+ /home/leo/src/Vrui-3.1-003/Threads/Config.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Thread.h \
+ /home/leo/src/Vrui-3.1-003/Vrui/Internal/MovieSaver.h \
+ /home/leo/src/Vrui-3.1-003/Threads/TripleBuffer.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Spinlock.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/Misc/StandardValueCoders.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ValueCoder.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.icpp \
+ /home/leo/src/Vrui-3.1-003/Misc/StringMarshaller.h  \
+ /home/leo/src/Vrui-3.1-003/Images/WriteImageFile.h \
+ /home/leo/src/Vrui-3.1-003/Images/RGBImage.h  \
+ /home/leo/src/Vrui-3.1-003/Images/Image.h \
+ /home/leo/src/Vrui-3.1-003/GL/GLColor.h \
+ /home/leo/src/Vrui-3.1-003/GL/GLScalarLimits.h

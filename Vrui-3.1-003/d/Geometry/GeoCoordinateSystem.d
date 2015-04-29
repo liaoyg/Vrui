@@ -1,0 +1,29 @@
+$(OBJDIR)/Geometry/GeoCoordinateSystem.o: \
+ Geometry/GeoCoordinateSystem.cpp  \
+ /home/leo/src/Vrui-3.1-003/Geometry/GeoCoordinateSystem.h \
+ /home/leo/src/Vrui-3.1-003/Misc/RefCounted.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Autopointer.h \
+ /home/leo/src/Vrui-3.1-003/IO/Directory.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/FileTests.h \
+ /home/leo/src/Vrui-3.1-003/IO/File.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/Endianness.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Point.h \
+ /home/leo/src/Vrui-3.1-003/Math/Math.h  \
+ /home/leo/src/Vrui-3.1-003/Geometry/ComponentArray.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Vector.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Box.h  \
+ /home/leo/src/Vrui-3.1-003/Geometry/Ray.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/SolidHitResult.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/HitResult.h \
+ /home/leo/src/Vrui-3.1-003/Math/Constants.h \
+ /home/leo/src/Vrui-3.1-003/Misc/SelfDestructPointer.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/IO/ValueSource.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Geoid.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Matrix.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/HVector.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Rotation.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/OrthonormalTransformation.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/AlbersEqualAreaProjection.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/LambertConformalProjection.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/TransverseMercatorProjection.h

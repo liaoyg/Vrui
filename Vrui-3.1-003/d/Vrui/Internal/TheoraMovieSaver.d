@@ -1,0 +1,33 @@
+$(OBJDIR)/Vrui/Internal/TheoraMovieSaver.o: \
+ Vrui/Internal/TheoraMovieSaver.cpp  \
+ /home/leo/src/Vrui-3.1-003/Vrui/Internal/TheoraMovieSaver.h \
+ /home/leo/src/Vrui-3.1-003/IO/File.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Endianness.h \
+ /home/leo/src/Vrui-3.1-003/Misc/RefCounted.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Autopointer.h \
+ /home/leo/src/Vrui-3.1-003/Video/OggStream.h  \
+ /home/leo/src/Vrui-3.1-003/Video/TheoraFrame.h \
+ /home/leo/src/Vrui-3.1-003/Video/TheoraEncoder.h \
+ /home/leo/src/Vrui-3.1-003/Video/TheoraPacket.h \
+ /home/leo/src/Vrui-3.1-003/Vrui/Internal/MovieSaver.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Time.h  \
+ /home/leo/src/Vrui-3.1-003/Threads/Thread.h \
+ /home/leo/src/Vrui-3.1-003/Threads/TripleBuffer.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Spinlock.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Config.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/Misc/StandardValueCoders.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ValueCoder.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ConfigurationFile.icpp \
+ /home/leo/src/Vrui-3.1-003/Misc/StringMarshaller.h \
+ /home/leo/src/Vrui-3.1-003/IO/OpenFile.h \
+ /home/leo/src/Vrui-3.1-003/IO/SeekableFile.h \
+ /home/leo/src/Vrui-3.1-003/IO/Directory.h \
+ /home/leo/src/Vrui-3.1-003/Misc/FileTests.h \
+ /home/leo/src/Vrui-3.1-003/Video/FrameBuffer.h \
+ /home/leo/src/Vrui-3.1-003/Video/ImageExtractorRGB8.h \
+ /home/leo/src/Vrui-3.1-003/Video/ImageExtractor.h \
+ /home/leo/src/Vrui-3.1-003/Video/OggPage.h \
+ /home/leo/src/Vrui-3.1-003/Video/TheoraInfo.h \
+ /home/leo/src/Vrui-3.1-003/Video/TheoraComment.h

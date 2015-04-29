@@ -1,0 +1,10 @@
+$(OBJDIR)/GL/GLExtensionManager.o: GL/GLExtensionManager.cpp \
+ /home/leo/src/Vrui-3.1-003/GL/GLExtensionManager.h \
+ /home/leo/src/Vrui-3.1-003/Misc/HashTable.h \
+ /home/leo/src/Vrui-3.1-003/Misc/PoolAllocator.h \
+ /home/leo/src/Vrui-3.1-003/Misc/StandardHashFunction.h \
+ /home/leo/src/Vrui-3.1-003/GL/TLSHelper.h \
+ /home/leo/src/Vrui-3.1-003/GL/Config.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/Misc/StringHashFunctions.h \
+ /home/leo/src/Vrui-3.1-003/GL/Extensions/GLExtension.h

@@ -1,0 +1,25 @@
+$(OBJDIR)/Vrui/Utilities/PrintInputDeviceDataFile.o: \
+ Vrui/Utilities/PrintInputDeviceDataFile.cpp  \
+ /home/leo/src/Vrui-3.1-003/Misc/StringMarshaller.h  \
+ /home/leo/src/Vrui-3.1-003/IO/File.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/Endianness.h \
+ /home/leo/src/Vrui-3.1-003/Misc/RefCounted.h \
+ /home/leo/src/Vrui-3.1-003/Misc/Autopointer.h \
+ /home/leo/src/Vrui-3.1-003/IO/SeekableFile.h \
+ /home/leo/src/Vrui-3.1-003/IO/OpenFile.h \
+ /home/leo/src/Vrui-3.1-003/IO/Directory.h \
+ /home/leo/src/Vrui-3.1-003/Misc/FileTests.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Vector.h \
+ /home/leo/src/Vrui-3.1-003/Math/Math.h  \
+ /home/leo/src/Vrui-3.1-003/Geometry/ComponentArray.h \
+ /home/leo/src/Vrui-3.1-003/Vrui/Geometry.h \
+ /home/leo/src/Vrui-3.1-003/Vrui/InputDevice.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CallbackList.h \
+ /home/leo/src/Vrui-3.1-003/Misc/CallbackData.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Point.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Ray.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/OrthonormalTransformation.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/HVector.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Rotation.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Matrix.h \
+ /home/leo/src/Vrui-3.1-003/Vrui/InputDeviceFeature.h

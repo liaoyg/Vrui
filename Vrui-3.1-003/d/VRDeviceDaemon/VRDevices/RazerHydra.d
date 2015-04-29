@@ -1,0 +1,19 @@
+$(OBJDIR)/VRDeviceDaemon/VRDevices/RazerHydra.o: \
+ VRDeviceDaemon/VRDevices/RazerHydra.cpp  \
+ /home/leo/src/Vrui-3.1-003/VRDeviceDaemon/VRDevices/RazerHydra.h \
+ /home/leo/src/Vrui-3.1-003/Misc/ReadBuffer.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/Endianness.h \
+ /home/leo/src/Vrui-3.1-003/Threads/Thread.h \
+ /home/leo/src/Vrui-3.1-003/USB/Device.h  \
+ /home/leo/src/Vrui-3.1-003/USB/VendorProductId.h \
+ /home/leo/src/Vrui-3.1-003/Misc/SizedTypes.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Point.h \
+ /home/leo/src/Vrui-3.1-003/Math/Math.h  \
+ /home/leo/src/Vrui-3.1-003/Geometry/ComponentArray.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Vector.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/Rotation.h \
+ /home/leo/src/Vrui-3.1-003/Geometry/HVector.h  \
+ /home/leo/src/Vrui-3.1-003/Misc/ThrowStdErr.h \
+ /home/leo/src/Vrui-3.1-003/Misc/FunctionCalls.h \
+ /home/leo/src/Vrui-3.1-003/USB/DeviceList.h \
+ /home/leo/src/Vrui-3.1-003/USB/DeviceList.icpp
