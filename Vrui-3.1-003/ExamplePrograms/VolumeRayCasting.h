@@ -51,9 +51,9 @@ class VolumeRayCasting:public Vrui::Application,public GLObject
   virtual ~VolumeRayCasting(void);
 
  private:
-  void SetTexture(GLuint shaderId, const GLchar *name, GLuint texture, GLenum type);
+  void SetTexture(GLuint shaderId, const GLchar *name, GLuint texture, GLenum type) const;
   /* Methods from Vrui::Application: */
-  //virtual void frame(void);
+  virtual void frame(void);
   virtual void display(GLContextData& contextData) const;
 	
   /* Methods from GLObject: */

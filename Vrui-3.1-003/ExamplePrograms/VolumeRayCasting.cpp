@@ -100,6 +100,7 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
   volumeData.resize(volumesize);
   std::ifstream ifs(datasetName, std::ios::binary);
 
+  std::cout<<"open dataset file "<<std::endl;
   if(!ifs.is_open())
     {
       /* fail to open dataset file */
@@ -155,19 +156,14 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
       {
     GLhandleARB vertexShader=glCompileVertexShaderFromFile("bin/Shaders/VolumeRayCasting.vert");
     GLhandleARB fragmentShader=glCompileFragmentShaderFromFile("bin/Shaders/VolumeRayCasting.frag");
+
 	dataItem->rayCastingShader=glLinkShader(vertexShader,fragmentShader);
+
 	glDeleteObjectARB(vertexShader);
 	glDeleteObjectARB(fragmentShader);
       }	
     }
-  GLuint index = glGetAttribLocationARB(dataItem->rayCastingShader, "Vertex");
-  glGenVertexArrays(1,&(dataItem->rectVerticesArrayId));
-  glBindVertexArray(dataItem->rectVerticesArrayId);
-  glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
-  glEnableVertexAttribArrayARB(index);
-  glVertexAttribPointerARB(index,2, GL_FLOAT,false,0,NULL);
-  glBindVertexArray(0);
-  glBindBufferARB(GL_ARRAY_BUFFER, 0);
+
 
   std::vector<Vector2f> rectVertices;
   rectVertices.push_back(Vector2f(0.0f,0.0f));
@@ -177,6 +173,15 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
   glGenBuffersARB(1,&(dataItem->rectVArrayBufferId));
   glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
   glBufferDataARB(GL_ARRAY_BUFFER, rectVertices.size()*sizeof(Vector2f), &rectVertices.front(),GL_STATIC_DRAW);
+  glBindBufferARB(GL_ARRAY_BUFFER, 0);
+
+  GLuint index = glGetAttribLocationARB(dataItem->rayCastingShader, "Vertex");
+  glGenVertexArrays(1,&(dataItem->rectVerticesArrayId));
+  glBindVertexArray(dataItem->rectVerticesArrayId);
+  glBindBufferARB(GL_ARRAY_BUFFER, dataItem->rectVArrayBufferId);
+  glEnableVertexAttribArrayARB(index);
+  glVertexAttribPointerARB(index,2, GL_FLOAT,false,0,NULL);
+  glBindVertexArray(0);
   glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
   //debug
@@ -192,7 +197,7 @@ void VolumeRayCasting::initContext(GLContextData& contextData) const
 
 }
 
-void VolumeRayCasting::SetTexture(GLuint shaderId, const GLchar *name, GLuint texture, GLenum type)
+void VolumeRayCasting::SetTexture(GLuint shaderId, const GLchar *name, GLuint texture, GLenum type) const
 {
   GLint location = glGetUniformLocationARB(shaderId, name);
   if(location < 0)
@@ -207,9 +212,13 @@ void VolumeRayCasting::SetTexture(GLuint shaderId, const GLchar *name, GLuint te
       glUseProgramObjectARB(shaderId);
       glUniform1iARB(location, index);
     }
-
   glActiveTexture(GL_TEXTURE0 + index);
   glBindTexture(type, texture);
+}
+
+void VolumeRayCasting::frame(void)
+{
+
 }
 
 void VolumeRayCasting::display(GLContextData& contextData) const
@@ -224,14 +233,20 @@ void VolumeRayCasting::display(GLContextData& contextData) const
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // SetTexture(dataItem->rayCastingShader, "volumeTex", dataItem->volumeTex, GL_TEXTURE_3D);
-  // SetTexture(dataItem->rayCastingShader, "transferFuncTex", dataItem->transferFuncTex, GL_TEXTURE_2D);
+  SetTexture(dataItem->rayCastingShader, "volumeTex", dataItem->volumeTex, GL_TEXTURE_3D);
+//  SetTexture((GLuint)(dataItem->rayCastingShader), "transferFuncTex", dataItem->transferFuncTex, GL_TEXTURE_2D);
 
+  std::cout<<"start draw"<<std::endl;
   glUseProgramObjectARB(dataItem->rayCastingShader);
   for(int i=0;i<1;++i)
     glCallList(dataItem->displayListIds[i]);
   glUseProgramObjectARB(0);
 
+//  glBegin(GL_TRIANGLES);
+//    glVertex3f(0.0f,0.0f,1.0f);
+//    glVertex3f(-1.0f,0.0f,-1.0f);
+//    glVertex3f(1.0f,0.0f,-1.0f);
+//  glEnd();
   glPopAttrib();
 }
 

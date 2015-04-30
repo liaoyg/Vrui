@@ -297,6 +297,6 @@ void main(void)
 //            col_acc = vec4(0.0, 0.0, 0.0, 1.0);
 
         //if(isBorder(rayEnd))
-            //FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        FragColor = col_acc;
+            FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        //FragColor = col_acc;
 }
