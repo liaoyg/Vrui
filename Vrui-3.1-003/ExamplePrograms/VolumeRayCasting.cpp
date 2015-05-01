@@ -239,6 +239,7 @@ void VolumeRayCasting::display(GLContextData& contextData) const
   SetTexture(dataItem->rayCastingShader, "transferFuncTex", dataItem->transferFuncTex, GL_TEXTURE_2D);
 
   //Set uniform
+  //modelview
   Mat4f modelViewMat = Mat4f(1.0f);
   for(int row = 0; row <3; row++)
       for(int col = 0; col<3; col++)
@@ -247,6 +248,15 @@ void VolumeRayCasting::display(GLContextData& contextData) const
       }
   for(int i = 0; i<3;i++)
     modelViewMat(i,3)=translation[i];
+  Mat4f invModelView = invert(modelViewMat);
+  GLint location = glGetUniformLocationARB(dataItem->rayCastingShader, "invModelView");
+  glProgramUniformMatrix4fvEXT(dataItem->rayCastingShader, location, true, &invModelView(0,0));
+
+  //aspect
+  float aspect = 1.0f;
+
+  //cotFOV
+  float cotfov = tan(Math::rad(90.f)-Math::rad(22.5f));
 
   std::cout<<"start draw"<<std::endl;
   glUseProgramObjectARB(dataItem->rayCastingShader);
