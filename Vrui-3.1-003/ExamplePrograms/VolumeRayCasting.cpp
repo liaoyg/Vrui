@@ -81,6 +81,8 @@ VolumeRayCasting::VolumeRayCasting(int& argc, char**& argv)
       else
 	transFuncData.push_back(Vector4f(1.0f, 0.0f, 1.0f, 0.0002f*i));
     }
+  rotation=Mat3f(1.0f);
+  translation = Vector3f(0.0f,0.0f,-2.0f);
 }
 
 VolumeRayCasting::~VolumeRayCasting(void)
@@ -234,7 +236,17 @@ void VolumeRayCasting::display(GLContextData& contextData) const
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   SetTexture(dataItem->rayCastingShader, "volumeTex", dataItem->volumeTex, GL_TEXTURE_3D);
-//  SetTexture((GLuint)(dataItem->rayCastingShader), "transferFuncTex", dataItem->transferFuncTex, GL_TEXTURE_2D);
+  SetTexture(dataItem->rayCastingShader, "transferFuncTex", dataItem->transferFuncTex, GL_TEXTURE_2D);
+
+  //Set uniform
+  Mat4f modelViewMat = Mat4f(1.0f);
+  for(int row = 0; row <3; row++)
+      for(int col = 0; col<3; col++)
+      {
+          modelViewMat(row,col) = rotation(row,col);
+      }
+  for(int i = 0; i<3;i++)
+    modelViewMat(i,3)=translation[i];
 
   std::cout<<"start draw"<<std::endl;
   glUseProgramObjectARB(dataItem->rayCastingShader);

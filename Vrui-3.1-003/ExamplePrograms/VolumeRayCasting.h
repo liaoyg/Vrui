@@ -10,6 +10,7 @@
 #include <Geometry/Vector.h>
 #include <Geometry/Box.h>
 #include <Geometry/OrthonormalTransformation.h>
+#include <Geometry/Matrix.h>
 #include <Vrui/Vrui.h>	
 #include <Vrui/DisplayState.h>
 #include <Vrui/InputDevice.h>
@@ -24,10 +25,14 @@ class VolumeRayCasting:public Vrui::Application,public GLObject
   typedef Geometry::Vector<int,3> Vector3i;
   typedef Geometry::Vector<Unit,3> Vector3f;
   typedef Geometry::Vector<Unit,4> Vector4f;
+  typedef Geometry::Matrix<float,3,3> Mat3f;
+  typedef Geometry::Matrix<float,4,4> Mat4f;
 
   //Vrui::Vector VolumeDim = Vrui::Vector(32,32,32);
   Vector3i VolumeDim;
   std::vector<Vector4f> transFuncData;
+  Mat3f rotation;
+  Vector3f translation;
 
   struct DataItem: public GLObject::DataItem
   {
