@@ -250,7 +250,7 @@ void VolumeRayCasting::display(GLContextData& contextData) const
     modelViewMat(i,3)=translation[i];
   Mat4f invModelView = invert(modelViewMat);
   GLint location = glGetUniformLocationARB(dataItem->rayCastingShader, "invModelView");
-  glProgramUniformMatrix4fvEXT(dataItem->rayCastingShader, location, true, &invModelView(0,0));
+  glUniformMatrix4fvARB(dataItem->rayCastingShader, location, true, &invModelView(0,0));
 
   //aspect
   float aspect = 1.0f;

@@ -88,7 +88,8 @@ ALL = $(EXEDIR)/VruiDemo \
       $(EXEDIR)/ClusterJello \
       $(EXEDIR)/SharedJelloServer \
       $(EXEDIR)/SharedJello \
-      $(EXEDIR)/VirtualClay
+      $(EXEDIR)/VirtualClay \
+      $(EXEDIR)/RayCastingVis \
 
 .PHONY: all
 all: $(ALL)
@@ -160,6 +161,14 @@ SHOWEARTHMODEL_SOURCES = EarthFunctions.cpp \
 $(OBJDIR)/ShowEarthModel.o: CFLAGS += -DSHOWEARTHMODEL_IMAGEDIR='"$(RESOURCEINSTALLDIR)"'
 
 $(EXEDIR)/ShowEarthModel: $(SHOWEARTHMODEL_SOURCES:%.cpp=$(OBJDIR)/%.o)
+
+#
+# RayCasting, A test implementation by Vrui
+# Using Polyhedron
+#
+
+$(EXEDIR)/RayCastingVis: $(OBJDIR)/RayCastingVis.o \
+                         $(OBJDIR)/Polyhedron.o 
 
 #
 # There's always room for Jell-O!
