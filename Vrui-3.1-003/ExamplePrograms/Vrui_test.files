@@ -132,3 +132,15 @@ bin/data/aneurism.raw
 bin/data/bonsai.raw
 bin/data/BostonTeapot.raw
 bin/data/skull.raw
+bin/Shaders/VolumeRayCasting.frag
+bin/Shaders/VolumeRayCasting.vert
+RayCastingVis.h
+RayCastingVis.cpp
+Polyhedron.cpp
+Polyhedron.h
+bin/Shaders/SingleChannelRaycaster.fs
+bin/Shaders/SingleChannelRaycaster.vs
+ColorMap.cpp
+ColorMap.h
+PaletteEditor.cpp
+PaletteEditor.h

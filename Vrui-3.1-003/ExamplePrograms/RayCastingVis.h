@@ -9,12 +9,31 @@
 #include <GL/GLObject.h>
 #include <GL/GLShader.h>
 #include <GL/GLColorMap.h>
-#include <Vrui/Vrui.h>
+//#include <Vrui/Vrui.h>
 #include <Vrui/DisplayState.h>
 #include <Vrui/Application.h>
+#include <GLMotif/Menu.h>
+#include <GLMotif/ToggleButton.h>
+#include <GLMotif/RadioBox.h>
+#include <GLMotif/Slider.h>
+#include <GLMotif/FileSelectionDialog.h>
 
 #include "Polyhedron.h"
+#include "PaletteEditor.h"
 
+/* Forward declarations: */
+namespace GLMotif {
+class Widget;
+class Popup;
+class PopupMenu;
+class PopupWindow;
+class RowColumn;
+class TextField;
+class ToggleButton;
+}
+namespace Misc {
+class CallbackData;
+}
 class RayCastingVis:public Vrui::Application,public GLObject
     {
     /* Embedded classes: */
@@ -84,6 +103,14 @@ class RayCastingVis:public Vrui::Application,public GLObject
 
     Scalar stepSize; // The ray casting step size in cell size units
 
+    /* Interface Element */
+    GLMotif::PopupMenu* mainMenu; // The main menu widget
+    GLMotif::ToggleButton* showPaletteEditorToggle; // Toggle button to show the palette editor
+
+    PaletteEditor* transFuncEditor;
+
+    /* Private methods: */
+    GLMotif::PopupMenu* createMainMenu(void);
     /* Protected methods: */
     protected:
     virtual void initDataItem(DataItem* dataItem) const; // Initializes the given context data item
@@ -138,6 +165,10 @@ class RayCastingVis:public Vrui::Application,public GLObject
     virtual void updateData(void); // Notifies the raycaster that the volume dataset has changed
     void setColorMap(const GLColorMap* newColorMap); // Sets the raycaster's color map
     void setTransparencyGamma(GLfloat newTransparencyGamma); // Sets the opacity adjustment factor
+
+    /* Callback Function */
+    void TransferFuncEditorCallback(Misc::CallbackData* cbData);
+    void showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
 };
 
 #endif // RAYCASTINGVIS_H

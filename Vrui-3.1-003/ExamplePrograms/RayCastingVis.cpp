@@ -20,6 +20,9 @@
 #include <Vrui/Vrui.h>
 #include <Vrui/VRWindow.h>
 #include <Vrui/DisplayState.h>
+#include <GLMotif/Popup.h>
+#include <GLMotif/PopupMenu.h>
+#include <GLMotif/Button.h>
 
 /************************************
 Methods of class Raycaster::DataItem:
@@ -144,6 +147,21 @@ void RayCastingVis::DataItem::initDepthBuffer(const int* windowSize)
 /**************************
 Methods of class Raycaster:
 **************************/
+
+GLMotif::PopupMenu* RayCastingVis::createMainMenu(void)
+{
+    GLMotif::PopupMenu* mainMenuPopup=new GLMotif::PopupMenu("MainMenuPopup",Vrui::getWidgetManager());
+    mainMenuPopup->setTitle("RayCasting Visualizer");
+
+    GLMotif::Menu* mainMenu=new GLMotif::Menu("MainMenu",mainMenuPopup,false);
+
+    showPaletteEditorToggle=new GLMotif::ToggleButton("ShowPaletteEditorToggle",mainMenu,"Show Transfer Function Editor");
+    showPaletteEditorToggle->getValueChangedCallbacks().add(this,&RayCastingVis::showPaletteEditorCallback);
+
+    mainMenu->manageChild();
+
+    return mainMenuPopup;
+}
 
 void RayCastingVis::initDataItem(RayCastingVis::DataItem* dataItem) const
     {
@@ -338,8 +356,14 @@ Polyhedron<RayCastingVis::Scalar>* RayCastingVis::clipDomain(const RayCastingVis
 
 RayCastingVis::RayCastingVis(int& argc, char**& argv)
     :Vrui::Application(argc,argv),
-     domainExtent(0),cellSize(0),stepSize(1)
+     domainExtent(0),cellSize(0),stepSize(1),
+     mainMenu(0),transFuncEditor(0)
     {
+    //initial interface
+    mainMenu = createMainMenu();
+    Vrui::setMainMenu(mainMenu);
+    transFuncEditor=new PaletteEditor;
+
     //Debug Report
      std::cout<<"Construct RayCastingVis"<<std::endl;
     const unsigned int sDataSize[3] = {256,256,256};
@@ -510,6 +534,19 @@ void RayCastingVis::display(GLContextData &contextData) const
     //Debug Report
 //     std::cout<<"Start Display"<<std::endl;
     glRenderAction(contextData);
+}
+
+void RayCastingVis::TransferFuncEditorCallback(Misc::CallbackData *cbData)
+{
+
+}
+void RayCastingVis::showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
+{
+    /* Hide or show palette editor based on toggle button state: */
+    if(cbData->set)
+        Vrui::popupPrimaryWidget(transFuncEditor);
+    else
+        Vrui::popdownPrimaryWidget(transFuncEditor);
 }
 
 VRUI_APPLICATION_RUN(RayCastingVis)

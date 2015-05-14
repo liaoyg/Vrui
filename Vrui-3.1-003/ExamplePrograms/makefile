@@ -168,7 +168,9 @@ $(EXEDIR)/ShowEarthModel: $(SHOWEARTHMODEL_SOURCES:%.cpp=$(OBJDIR)/%.o)
 #
 
 $(EXEDIR)/RayCastingVis: $(OBJDIR)/RayCastingVis.o \
-                         $(OBJDIR)/Polyhedron.o 
+                         $(OBJDIR)/Polyhedron.o \
+			 $(OBJDIR)/ColorMap.o \
+			 $(OBJDIR)/PaletteEditor.o
 
 #
 # There's always room for Jell-O!
