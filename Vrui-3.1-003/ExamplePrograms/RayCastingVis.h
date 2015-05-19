@@ -91,7 +91,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     std::vector<unsigned char> volumeData;
     Voxel* data;
     unsigned int dataVersion; // Version number of the volume dataset to track changes
-    const GLColorMap* colorMap; // Pointer to the color map
+    GLColorMap* colorMap; // Pointer to the color map
     GLfloat transparencyGamma; // Adjustment factor for color map's overall opacity
 
     unsigned int dataSize[3]; // Size of volume data
@@ -163,12 +163,13 @@ class RayCastingVis:public Vrui::Application,public GLObject
     virtual void display(GLContextData& contextData) const;
 
     virtual void updateData(void); // Notifies the raycaster that the volume dataset has changed
-    void setColorMap(const GLColorMap* newColorMap); // Sets the raycaster's color map
+    void setColorMap(GLColorMap* newColorMap); // Sets the raycaster's color map
     void setTransparencyGamma(GLfloat newTransparencyGamma); // Sets the opacity adjustment factor
 
     /* Callback Function */
     void TransferFuncEditorCallback(Misc::CallbackData* cbData);
     void showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
+    void savePaletteCallback(Misc::CallbackData* cbData);
 };
 
 #endif // RAYCASTINGVIS_H

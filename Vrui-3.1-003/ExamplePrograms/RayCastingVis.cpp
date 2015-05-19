@@ -3,6 +3,7 @@
 #include <fstream>
 #include <errno.h>
 #include <Misc/ThrowStdErr.h>
+#include <Misc/CreateNumberedFileName.h>
 #include <Math/Math.h>
 #include <Geometry/Vector.h>
 #include <GL/gl.h>
@@ -288,11 +289,11 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
     glUniform1iARB(dataItem->colorMapSamplerLoc,2);
 
     /* Create the stepsize-adjusted colormap with pre-multiplied alpha: */
-    GLColorMap* adjustedColorMap = new GLColorMap(GLColorMap::RAINBOW|GLColorMap::RAMP_ALPHA,1.0f,1.0f,1.0,100.0);
-    adjustedColorMap->changeTransparency(stepSize*transparencyGamma);
-    adjustedColorMap->premultiplyAlpha();
+//    GLColorMap* adjustedColorMap = new GLColorMap(GLColorMap::RAINBOW|GLColorMap::RAMP_ALPHA,1.0f,1.0f,1.0,100.0);
+//    adjustedColorMap->changeTransparency(stepSize*transparencyGamma);
+//    adjustedColorMap->premultiplyAlpha();
 
-    glTexImage1D(GL_TEXTURE_1D,0,dataItem->haveFloatTextures?GL_RGBA32F_ARB:GL_RGBA,256,0,GL_RGBA,GL_FLOAT,adjustedColorMap->getColors());
+    glTexImage1D(GL_TEXTURE_1D,0,dataItem->haveFloatTextures?GL_RGBA32F_ARB:GL_RGBA,256,0,GL_RGBA,GL_FLOAT,colorMap->getColors());
     //Debug Report
 //     std::cout<<"Finish Update Texture"<<std::endl;
     }
@@ -363,6 +364,8 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     mainMenu = createMainMenu();
     Vrui::setMainMenu(mainMenu);
     transFuncEditor=new PaletteEditor;
+    transFuncEditor->getColorMapChangedCallbacks().add(this,&RayCastingVis::TransferFuncEditorCallback);
+//    transFuncEditor->getSavePaletteCallbacks().add(this,&RayCastingVis::savePaletteCallback);
 
     //Debug Report
      std::cout<<"Construct RayCastingVis"<<std::endl;
@@ -402,7 +405,9 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 
     //data = new Voxel[dataSize[0]*dataSize[1]*dataSize[2]];
     dataVersion = 1;
-    colorMap = 0;
+    colorMap = new GLColorMap(GLColorMap::RAINBOW|GLColorMap::RAMP_ALPHA,1.0f,1.0f,1.0,100.0);
+    colorMap->changeTransparency(stepSize*transparencyGamma);
+    colorMap->premultiplyAlpha();
     transparencyGamma = 1.0f;
     }
 
@@ -514,7 +519,7 @@ void RayCastingVis::updateData(void)
     ++dataVersion;
     }
 
-void RayCastingVis::setColorMap(const GLColorMap* newColorMap)
+void RayCastingVis::setColorMap(GLColorMap* newColorMap)
     {
     colorMap=newColorMap;
     }
@@ -538,7 +543,10 @@ void RayCastingVis::display(GLContextData &contextData) const
 
 void RayCastingVis::TransferFuncEditorCallback(Misc::CallbackData *cbData)
 {
-
+    transFuncEditor->exportColorMap(*colorMap);
+    //Debug Report
+     std::cout<<"export ColorMap"<<std::endl;
+    Vrui::requestUpdate();
 }
 void RayCastingVis::showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
 {
@@ -547,6 +555,21 @@ void RayCastingVis::showPaletteEditorCallback(GLMotif::ToggleButton::ValueChange
         Vrui::popupPrimaryWidget(transFuncEditor);
     else
         Vrui::popdownPrimaryWidget(transFuncEditor);
+}
+void RayCastingVis::savePaletteCallback(Misc::CallbackData* cbData)
+{
+    if(Vrui::isMaster())
+        {
+        try
+            {
+            char numberedFileName[40];
+            transFuncEditor->savePalette(Misc::createNumberedFileName("SavedPalette.pal",4,numberedFileName));
+            }
+        catch(std::runtime_error)
+            {
+            /* Ignore errors and carry on: */
+            }
+        }
 }
 
 VRUI_APPLICATION_RUN(RayCastingVis)
