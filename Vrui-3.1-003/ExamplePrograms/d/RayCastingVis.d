@@ -77,6 +77,7 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/GLMotif/GlyphGadget.h \
  /home/leo/Vrui-3.1/include/GLMotif/PopupWindow.h Polyhedron.h \
  PaletteEditor.h ColorMap.h  \
+ /home/leo/Vrui-3.1/include/Misc/CreateNumberedFileName.h \
  /home/leo/Vrui-3.1/include/GL/GLContextData.h \
  /home/leo/Vrui-3.1/include/Misc/HashTable.h \
  /home/leo/Vrui-3.1/include/Misc/PoolAllocator.h \

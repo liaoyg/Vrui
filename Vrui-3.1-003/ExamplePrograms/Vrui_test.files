@@ -134,6 +134,7 @@ bin/data/BostonTeapot.raw
 bin/data/skull.raw
 bin/Shaders/VolumeRayCasting.frag
 bin/Shaders/VolumeRayCasting.vert
+<<<<<<< Updated upstream
 RayCastingVis.h
 RayCastingVis.cpp
 Polyhedron.cpp
@@ -144,3 +145,5 @@ ColorMap.cpp
 ColorMap.h
 PaletteEditor.cpp
 PaletteEditor.h
+=======
+>>>>>>> Stashed changes

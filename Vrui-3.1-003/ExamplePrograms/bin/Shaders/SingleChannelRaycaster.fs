@@ -21,7 +21,7 @@ vec3 sampleGrad(sampler3D sampler, vec3 coord)
         return vec3(dx, dy, dz);
 }
 
-vec3 lightPos = vec3(1.0, 1.0, 0.0);
+vec3 lightPos = vec3(1.0, 0.0, 0.0);
 float fshiness = 180;
 
 float getLightIntensity(vec3 norm, vec3 pos,float ambientC,float specularC,float diffuseC)
@@ -93,6 +93,9 @@ void main()
                         /* Light intensity at the sample position*/
                         float lightIntensity = getLightIntensity(sampleGrad(volumeSampler,samplePos),samplePos,ambientCoE,specularCoE,diffuseCoE);
                         vol.rgb *= lightIntensity;
+
+                        /* opacity correction*/
+                        vol.rgb *= vol.a;
 			
 			/* Accumulate color and opacity: */
 			accum+=vol*(1.0-accum.a);
