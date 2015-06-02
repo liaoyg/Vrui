@@ -147,3 +147,5 @@ PaletteEditor.cpp
 PaletteEditor.h
 =======
 >>>>>>> Stashed changes
+bin/Shaders/PreIntegration.vert
+bin/Shaders/PreIntegration.frag

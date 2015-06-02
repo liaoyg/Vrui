@@ -8,11 +8,14 @@
 #include <Geometry/Vector.h>
 #include <GL/gl.h>
 #include <GL/GLContextData.h>
+#include <GL/Extensions/GLARBVertexShader.h>
 #include <GL/Extensions/GLARBDepthTexture.h>
 #include <GL/Extensions/GLARBMultitexture.h>
 #include <GL/Extensions/GLARBShadow.h>
 #include <GL/Extensions/GLARBTextureNonPowerOfTwo.h>
 #include <GL/Extensions/GLEXTFramebufferObject.h>
+#include <GL/Extensions/GLARBVertexBufferObject.h>
+#include <GL/Extensions/GLARBVertexArrayObject.h>
 #include <GL/Extensions/GLEXTTexture3D.h>
 #include <GL/Extensions/GLARBTextureFloat.h>
 #include <GL/GLShader.h>
@@ -85,6 +88,23 @@ RayCastingVis::DataItem::DataItem(void)
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+    if(GLARBVertexBufferObject::isSupported())
+        {
+        /* Initialize the vertex buffer object extension: */
+        GLARBVertexBufferObject::initExtension();
+
+        /* Create a vertex buffer object: */
+        glGenBuffersARB(1,&vertexBufferObjectID);
+        }
+    if(GLARBVertexArrayObject::isSupported())
+        {
+        /* Initialize the vertex buffer object extension: */
+        GLARBVertexArrayObject::initExtension();
+
+        /* Create a vertex buffer object: */
+        glGenVertexArrays(1,&vertexArrayObjectID);
+        }
     }
 
 RayCastingVis::DataItem::~DataItem(void)
@@ -98,6 +118,13 @@ RayCastingVis::DataItem::~DataItem(void)
 
     /* Destroy the color map texture object: */
     glDeleteTextures(1,&colorMapTextureID);
+
+    if(vertexBufferObjectID!=0)
+        {
+        /* Destroy the vertex buffer object: */
+        glDeleteBuffersARB(1,&vertexBufferObjectID);
+        }
+
     }
 
 void RayCastingVis::DataItem::initDepthBuffer(const int* windowSize)
@@ -144,6 +171,39 @@ void RayCastingVis::DataItem::initDepthBuffer(const int* windowSize)
     /* Unbind the depth texture: */
     glBindTexture(GL_TEXTURE_2D,0);
     }
+
+void RayCastingVis::DataItem::initialPreIntBuffer(GLColorMap *colormap)
+{
+    /* Create the depth texture: */
+    glGenTextures(1,&preIntTextureID);
+    glBindTexture(GL_TEXTURE_2D,preIntTextureID);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,256,256,0,GL_RGBA,GL_FLOAT,colormap->getColors());
+//    depthTextureSize[0]=depthTextureSize[1]=1;
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    /* Create the depth framebuffer and attach the depth texture to it: */
+    glGenFramebuffersEXT(1,&preIntFramebufferID);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,preIntFramebufferID);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,preIntTextureID,0);
+//    glDrawBuffer(GL_NONE);
+//    glReadBuffer(GL_NONE);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+    /* initial shader*/
+    deltastepLoc=preIntShader.getUniformLocation("delta_step");
+    OCSizeLoc=preIntShader.getUniformLocation("OCSize");
+
+    transFuncTexLoc=preIntShader.getUniformLocation("transferFTex");
+}
+
+void RayCastingVis::DataItem::updatePreIntTexture()
+{
+
+}
 
 /**************************
 Methods of class Raycaster:
@@ -265,8 +325,6 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
     glBindTexture(GL_TEXTURE_3D,dataItem->volumeTextureID);
     glUniform1iARB(dataItem->volumeSamplerLoc,1);
 
-    //Debug Report
-//     std::cout<<"Update Volume Texture"<<std::endl;
     /* Check if the volume texture needs to be updated: */
     if(dataItem->volumeTextureVersion!=dataVersion)
         {
@@ -281,21 +339,12 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
         dataItem->volumeTextureVersion=dataVersion;
         }
 
-    //Debug Report
-//     std::cout<<"Update ColorMap Texture"<<std::endl;
     /* Bind the color map texture: */
     glActiveTextureARB(GL_TEXTURE2_ARB);
     glBindTexture(GL_TEXTURE_1D,dataItem->colorMapTextureID);
     glUniform1iARB(dataItem->colorMapSamplerLoc,2);
 
-    /* Create the stepsize-adjusted colormap with pre-multiplied alpha: */
-//    GLColorMap* adjustedColorMap = new GLColorMap(GLColorMap::RAINBOW|GLColorMap::RAMP_ALPHA,1.0f,1.0f,1.0,100.0);
-//    adjustedColorMap->changeTransparency(stepSize*transparencyGamma);
-//    adjustedColorMap->premultiplyAlpha();
-
     glTexImage1D(GL_TEXTURE_1D,0,dataItem->haveFloatTextures?GL_RGBA32F_ARB:GL_RGBA,256,0,GL_RGBA,GL_FLOAT,colorMap->getColors());
-    //Debug Report
-//     std::cout<<"Finish Update Texture"<<std::endl;
     }
 
 void RayCastingVis::unbindShader(RayCastingVis::DataItem* dataItem) const
@@ -357,7 +406,7 @@ Polyhedron<RayCastingVis::Scalar>* RayCastingVis::clipDomain(const RayCastingVis
 
 RayCastingVis::RayCastingVis(int& argc, char**& argv)
     :Vrui::Application(argc,argv),
-     domainExtent(0),cellSize(0),stepSize(1),
+     domainExtent(0),cellSize(0),stepSize(2),
      mainMenu(0),transFuncEditor(0)
     {
     //initial interface
@@ -387,13 +436,13 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     cellSize=Math::sqrt(cellSize);
 
     // initial data
-    const char* datasetName = "bin/data/BostonTeapot.raw";
+    const char* datasetName = "bin/data/bonsai.raw";
     int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
     /*load sample data*/
     volumeData.resize(volumesize);
     std::ifstream ifs(datasetName, std::ios::binary);
 
-    std::cout<<"open dataset file "<<std::endl;
+    std::cout<<"open dataset file "<<datasetName<<std::endl;
     if(!ifs.is_open())
       {
         /* fail to open dataset file */
@@ -451,6 +500,41 @@ void RayCastingVis::initContext(GLContextData& contextData) const
         /* Print an error message, but continue: */
         std::cerr<<"SingleChannelRaycaster::initContext: Caught exception "<<err.what()<<std::endl;
         }
+
+     /* initial and compile pre-integret shader*/
+     try
+         {
+         /* Load and compile the vertex program: */
+         std::string vertexShaderName="bin/Shaders/PreIntegration.vert";
+         dataItem->preIntShader.compileVertexShader(vertexShaderName.c_str());
+         std::string fragmentShaderName="bin/Shaders/PreIntegration.frag";
+         dataItem->preIntShader.compileFragmentShader(fragmentShaderName.c_str());
+         dataItem->preIntShader.linkShader();
+
+         /* Initialize the raycasting shader: */
+         initShader(dataItem);
+         }
+     catch(std::runtime_error err)
+         {
+         /* Print an error message, but continue: */
+         std::cerr<<"SingleChannelRaycaster::initContext: Caught exception preintegration shader "<<err.what()<<std::endl;
+         }
+     /* Check if the vertex buffer object extension is supported: */
+
+     if(dataItem->vertexBufferObjectID>0)
+         {
+         std::vector<Point2D> preIntVertices;
+         preIntVertices.push_back(Point2D(-1.0,-1.0));
+         preIntVertices.push_back(Point2D(-1.0,1.0));
+         preIntVertices.push_back(Point2D(1.0,1.0));
+         preIntVertices.push_back(Point2D(1.0,-1.0));
+         /* Create a vertex buffer object to store the points' coordinates: */
+         glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
+         glBufferDataARB(GL_ARRAY_BUFFER_ARB,preIntVertices.size()*sizeof(Point2D),0,GL_STATIC_DRAW_ARB);
+
+         /* Protect the vertex buffer object: */
+         glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
+         }
     }
 
 void RayCastingVis::glRenderAction(GLContextData& contextData) const
@@ -507,6 +591,8 @@ void RayCastingVis::glRenderAction(GLContextData& contextData) const
     unbindShader(dataItem);
     GLShader::disablePrograms();
 
+    //test draw pre-intgretion texture
+    drawPreIntTexture(dataItem);
     /* Clean up: */
     delete clippedDomain;
 
@@ -570,6 +656,45 @@ void RayCastingVis::savePaletteCallback(Misc::CallbackData* cbData)
             /* Ignore errors and carry on: */
             }
         }
+}
+void RayCastingVis::bindPreIntShader(DataItem *dataItem) const
+{
+    dataItem->initialPreIntBuffer(colorMap);
+    /* Set the sampling step size: */
+    glUniform1fARB(dataItem->deltastepLoc,stepSize*cellSize);
+    glUniform1fARB(dataItem->OCSizeLoc,stepSize*cellSize);
+
+    /* Bind the transfer function texture: */
+    glActiveTextureARB(GL_TEXTURE2_ARB);
+    glBindTexture(GL_TEXTURE_2D,dataItem->preIntTextureID);
+    glUniform1iARB(dataItem->transFuncTexLoc,1);
+
+//    GLint index = dataItem->preIntShader.
+//    glBindVertexArray(dataItem->vertexArrayObjectID);
+//    glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
+//    glEnableVertexAttribArrayARB(index);
+//    glVertexAttribPointerARB(index,2, GL_FLOAT,false,0,NULL);
+//    glBindVertexArray(0);
+//    glBindBufferARB(GL_ARRAY_BUFFER, 0);
+
+}
+void RayCastingVis::unbindPreIntShader(DataItem *dataItem) const
+{
+    /* Unbind the transfer function texture: */
+    glActiveTextureARB(GL_TEXTURE2_ARB);
+    glBindTexture(GL_TEXTURE_2D,0);
+}
+void RayCastingVis::drawPreIntTexture(DataItem* dataItem) const
+{
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->preIntFramebufferID);
+    dataItem->preIntShader.useProgram();
+    bindPreIntShader(dataItem);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
+    glDrawArrays(GL_TRIANGLE_FAN,0,4);
+    glBindBufferARB(GL_ARRAY_BUFFER, 0);
+    unbindPreIntShader(dataItem);
+    GLShader::disablePrograms();
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 }
 
 VRUI_APPLICATION_RUN(RayCastingVis)

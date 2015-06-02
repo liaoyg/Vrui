@@ -39,6 +39,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     /* Embedded classes: */
     public:
     typedef float Scalar;
+    typedef Geometry::Point<Scalar,2> Point2D;
     typedef Geometry::Point<Scalar,3> Point;
     typedef Geometry::Box<Scalar,3> Box;
     typedef Geometry::Plane<Scalar,3> Plane;
@@ -60,7 +61,18 @@ class RayCastingVis:public Vrui::Application,public GLObject
         GLuint depthFramebufferID; // Framebuffer object ID to render to the ray termination buffer
         GLsizei depthTextureSize[2]; // Current size of the depth texture
 
+        int transFuncTexLoc;
+        int deltastepLoc;
+        int OCSizeLoc;
+        GLuint vertexBufferObjectID;
+        GLuint vertexArrayObjectID;
+
         GLShader shader; // Shader object for the raycasting algorithm
+
+        bool usePreIntegration; // Flag whether use pre integeted transfer function
+        GLuint preIntTextureID;
+        GLuint preIntFramebufferID;
+        GLShader preIntShader;
 
         bool haveFloatTextures; // Flag whether the local OpenGL supports floating-point textures
 
@@ -84,6 +96,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
 
         /* Methods: */
         virtual void initDepthBuffer(const int* windowSize); // Creates the depth texture and framebuffer based on current OpenGL state and copies the current depth buffer contents
+        void initialPreIntBuffer(GLColorMap *colormap);
+        void updatePreIntTexture();
         };
 
     /* Elements: */
@@ -170,6 +184,11 @@ class RayCastingVis:public Vrui::Application,public GLObject
     void TransferFuncEditorCallback(Misc::CallbackData* cbData);
     void showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
     void savePaletteCallback(Misc::CallbackData* cbData);
+
+    /* Pre Integreted transfer function Method*/
+    void bindPreIntShader(DataItem* dataItem) const;
+    void unbindPreIntShader(DataItem* dataItem)const;
+    void drawPreIntTexture(DataItem* dataItem) const;
 };
 
 #endif // RAYCASTINGVIS_H

@@ -82,11 +82,15 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/Misc/HashTable.h \
  /home/leo/Vrui-3.1/include/Misc/PoolAllocator.h \
  /home/leo/Vrui-3.1/include/Misc/StandardHashFunction.h \
+ /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexShader.h \
+ /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexProgram.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBDepthTexture.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBMultitexture.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBShadow.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBTextureNonPowerOfTwo.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLEXTFramebufferObject.h \
+ /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexBufferObject.h \
+ /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexArrayObject.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLEXTTexture3D.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBTextureFloat.h \
  /home/leo/Vrui-3.1/include/GL/GLGeometryWrappers.h \

@@ -1,32 +1,30 @@
-#version 330
-//layout(location = 0)
-out vec4 accum;
-in vec2 pos;
-
-uniform sampler2D TF;
-uniform float deltastep;
+uniform sampler2D transferFTex;
+uniform float delta_step;
 uniform float OCSize;
 
+varying vec2 pos;
 
 void main(void)
 {
-    accum = vec4(0.0);
-    float d = deltastep;
-    float d0 = OCSize;
-    float TFSize = float(textureSize(TF, 0));
+    vec4 accum = vec4(0.0);
+    float d = delta_step;
+    float correction_delta = OCSize;
+    float size_TF = float(textureSize(transferFTex,0));
     float s = pos.x, t = pos.y;
-    int steps = int(round(abs(t-s)*TFSize)) + 1;
-    float delta = sign(t-s)/TFSize;
-    float OCFact = d/(d0*float(steps));
+    int steps = ceil(abs(t-s)*size_TF);
+    float delta = sign(t-s)/size_TF;
+    float OCFact = d/(correction_delta*float(steps));
 
-    for(int i=0; i<steps; i++)
+    for(int i = 0; i<steps; i++)
     {
-        vec4 c = texture(TF, vec2(s,0.0));
+        vec4 c = texture2D(transferFTex, vec2(s,0.0));
         c.a = 1.0 - pow(1.0 - c.a, OCFact);
         c.rgb *= c.a;
-        accum += (1.0-accum.a)*c;
+        accum += (1- accum.a)*c;
         s += delta;
     }
+
     accum = clamp(accum, vec4(0.0), vec4(1.0));
-    //accum = vec4(1.0,0.0,0.0,1.0);
+
+    gl_FragColor = accum;
 }

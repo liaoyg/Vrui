@@ -258,8 +258,8 @@ void VolumeRayCasting::display(GLContextData& contextData) const
   //cotFOV
   float cotfov = tan(Math::rad(90.f)-Math::rad(22.5f));
 
-  std::cout<<"start draw"<<std::endl;
   glUseProgramObjectARB(dataItem->rayCastingShader);
+  std::cout<<"start draw"<<std::endl;
   for(int i=0;i<1;++i)
     glCallList(dataItem->displayListIds[i]);
   glUseProgramObjectARB(0);
