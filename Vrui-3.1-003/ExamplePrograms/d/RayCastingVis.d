@@ -77,6 +77,7 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/GLMotif/GlyphGadget.h \
  /home/leo/Vrui-3.1/include/GLMotif/PopupWindow.h Polyhedron.h \
  PaletteEditor.h ColorMap.h  \
+ /home/leo/Vrui-3.1/include/Misc/FileNameExtensions.h \
  /home/leo/Vrui-3.1/include/Misc/CreateNumberedFileName.h \
  /home/leo/Vrui-3.1/include/GL/GLContextData.h \
  /home/leo/Vrui-3.1/include/Misc/HashTable.h \
@@ -108,5 +109,14 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/GL/GLContext.h \
  /home/leo/Vrui-3.1/include/Threads/RefCounted.h \
  /home/leo/Vrui-3.1/include/Threads/Config.h  \
-  /home/leo/Vrui-3.1/include/GLMotif/Popup.h \
+  /home/leo/Vrui-3.1/include/Vrui/OpenFile.h \
+ /home/leo/Vrui-3.1/include/IO/OpenFile.h \
+ /home/leo/Vrui-3.1/include/IO/SeekableFile.h \
+ /home/leo/Vrui-3.1/include/GLMotif/StyleSheet.h \
+ /home/leo/Vrui-3.1/include/GLMotif/WidgetManager.h \
+ /home/leo/Vrui-3.1/include/GLMotif/WidgetAttribute.h \
+ /home/leo/Vrui-3.1/include/GLMotif/Blind.h \
+ /home/leo/Vrui-3.1/include/GLMotif/CascadeButton.h \
+ /home/leo/Vrui-3.1/include/GLMotif/SubMenu.h \
+ /home/leo/Vrui-3.1/include/GLMotif/Popup.h \
  /home/leo/Vrui-3.1/include/GLMotif/PopupMenu.h

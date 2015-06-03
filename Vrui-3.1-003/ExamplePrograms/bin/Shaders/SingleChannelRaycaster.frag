@@ -7,6 +7,11 @@ uniform vec3 eyePosition;
 uniform float stepSize;
 uniform sampler3D volumeSampler;
 uniform sampler1D colorMapSampler;
+uniform float ambientCoE;
+uniform float specularCoE;
+uniform float diffuseCoE;
+
+uniform bool lightFlag;
 
 varying vec3 mcPosition;
 varying vec3 dcPosition;
@@ -18,11 +23,11 @@ vec3 sampleGrad(sampler3D sampler, vec3 coord)
         float dx = textureOffset(sampler, coord, ivec3(offset, 0, 0)).r - textureOffset(sampler, coord, ivec3(-offset, 0, 0)).r;
         float dy = textureOffset(sampler, coord, ivec3(0, offset, 0)).r - textureOffset(sampler, coord, ivec3(0, -offset, 0)).r;
         float dz = textureOffset(sampler, coord, ivec3(0, 0, offset)).r - textureOffset(sampler, coord, ivec3(0, 0, -offset)).r;
-        return vec3(dx, dy, dz);
+        return normalize(vec3(dx, dy, dz));
 }
 
 vec3 lightPos = vec3(1.0, 0.0, 0.0);
-float fshiness = 180;
+float fshiness = 100;
 
 float getLightIntensity(vec3 norm, vec3 pos,float ambientC,float specularC,float diffuseC)
 {
@@ -36,8 +41,6 @@ float getLightIntensity(vec3 norm, vec3 pos,float ambientC,float specularC,float
     vec3 reflectvec = -reflect(lightVec,norm);
     //calculate Ambient Term:
     float Iamb = ambientC;
-    //if(LAOFlag)
-        //Iamb = texture(LAOTex,pos).r*ambientC;
     //calculate Diffuse Term:
     float Idiff =   diffuseC * max(dot(norm, lightVec), 0.0);
     Idiff = clamp(Idiff, 0.0, 1.0);
@@ -49,11 +52,6 @@ float getLightIntensity(vec3 norm, vec3 pos,float ambientC,float specularC,float
 
 void main()
 	{
-        /* Light Setting parameter */
-        float ambientCoE = 0.6;
-        float specularCoE = 0.4;
-        float diffuseCoE = 0.5;
-
 	/* Calculate the ray direction in model coordinates: */
 	vec3 mcDir=mcPosition-eyePosition;
 	
@@ -91,8 +89,11 @@ void main()
 			vec4 vol=texture1D(colorMapSampler,texture3D(volumeSampler,samplePos).a);
 
                         /* Light intensity at the sample position*/
+                        if(lightFlag)
+                        {
                         float lightIntensity = getLightIntensity(sampleGrad(volumeSampler,samplePos),samplePos,ambientCoE,specularCoE,diffuseCoE);
                         vol.rgb *= lightIntensity;
+                        }
 
                         /* opacity correction*/
                         vol.rgb *= vol.a;

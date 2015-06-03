@@ -139,8 +139,8 @@ RayCastingVis.h
 RayCastingVis.cpp
 Polyhedron.cpp
 Polyhedron.h
-bin/Shaders/SingleChannelRaycaster.fs
-bin/Shaders/SingleChannelRaycaster.vs
+bin/Shaders/SingleChannelRaycaster.frag
+bin/Shaders/SingleChannelRaycaster.vert
 ColorMap.cpp
 ColorMap.h
 PaletteEditor.cpp
@@ -149,3 +149,6 @@ PaletteEditor.h
 >>>>>>> Stashed changes
 bin/Shaders/PreIntegration.vert
 bin/Shaders/PreIntegration.frag
+ShowEarthModel.cpp
+ShowEarthModel.h
+Animation.cpp

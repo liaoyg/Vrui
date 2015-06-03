@@ -3,6 +3,7 @@
 #include <fstream>
 #include <errno.h>
 #include <Misc/ThrowStdErr.h>
+#include <Misc/FileNameExtensions.h>
 #include <Misc/CreateNumberedFileName.h>
 #include <Math/Math.h>
 #include <Geometry/Vector.h>
@@ -24,9 +25,20 @@
 #include <Vrui/Vrui.h>
 #include <Vrui/VRWindow.h>
 #include <Vrui/DisplayState.h>
+#include <Vrui/OpenFile.h>
+#include <GLMotif/StyleSheet.h>
+#include <GLMotif/WidgetManager.h>
+#include <GLMotif/Blind.h>
+#include <GLMotif/Label.h>
+#include <GLMotif/Button.h>
+#include <GLMotif/CascadeButton.h>
+#include <GLMotif/Menu.h>
+#include <GLMotif/SubMenu.h>
 #include <GLMotif/Popup.h>
 #include <GLMotif/PopupMenu.h>
-#include <GLMotif/Button.h>
+#include <GLMotif/PopupWindow.h>
+#include <GLMotif/RowColumn.h>
+#include <GLMotif/TextField.h>
 
 /************************************
 Methods of class Raycaster::DataItem:
@@ -175,6 +187,7 @@ void RayCastingVis::DataItem::initDepthBuffer(const int* windowSize)
 void RayCastingVis::DataItem::initialPreIntBuffer(GLColorMap *colormap)
 {
     /* Create the depth texture: */
+    std::cout<<"initial preint buffer"<<std::endl;
     glGenTextures(1,&preIntTextureID);
     glBindTexture(GL_TEXTURE_2D,preIntTextureID);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
@@ -188,7 +201,9 @@ void RayCastingVis::DataItem::initialPreIntBuffer(GLColorMap *colormap)
     /* Create the depth framebuffer and attach the depth texture to it: */
     glGenFramebuffersEXT(1,&preIntFramebufferID);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,preIntFramebufferID);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D,preIntTextureID,0);
+    colAtt = GL_COLOR_ATTACHMENT0_EXT;
+    glDrawBuffer(colAtt);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,colAtt,GL_TEXTURE_2D,preIntTextureID,0);
 //    glDrawBuffer(GL_NONE);
 //    glReadBuffer(GL_NONE);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
@@ -217,11 +232,71 @@ GLMotif::PopupMenu* RayCastingVis::createMainMenu(void)
     GLMotif::Menu* mainMenu=new GLMotif::Menu("MainMenu",mainMenuPopup,false);
 
     showPaletteEditorToggle=new GLMotif::ToggleButton("ShowPaletteEditorToggle",mainMenu,"Show Transfer Function Editor");
-    showPaletteEditorToggle->getValueChangedCallbacks().add(this,&RayCastingVis::showPaletteEditorCallback);
+    showPaletteEditorToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
+
+    showRenderSettiingToggle=new GLMotif::ToggleButton("ShowRenderSettingToggle",mainMenu,"Show Render Setting Dialog");
+    showRenderSettiingToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
 
     mainMenu->manageChild();
 
     return mainMenuPopup;
+}
+GLMotif::PopupWindow* RayCastingVis::createRenderSettingDlg(void)
+{
+    const GLMotif::StyleSheet& ss=*Vrui::getWidgetManager()->getStyleSheet();
+
+    GLMotif::PopupWindow* renderDialogPopup=new GLMotif::PopupWindow("RenderDialogPopup",Vrui::getWidgetManager(),"Render Settings");
+    renderDialogPopup->setResizableFlags(true,false);
+    renderDialogPopup->setCloseButton(true);
+    renderDialogPopup->getCloseCallbacks().add(this,&RayCastingVis::renderDialogCloseCallback);
+
+    GLMotif::RowColumn* renderDialog=new GLMotif::RowColumn("RenderDialog",renderDialogPopup,false);
+    renderDialog->setOrientation(GLMotif::RowColumn::VERTICAL);
+    renderDialog->setPacking(GLMotif::RowColumn::PACK_TIGHT);
+    renderDialog->setNumMinorWidgets(2);
+
+    GLMotif::ToggleButton* showSurfaceToggle=new GLMotif::ToggleButton("lightFlag",renderDialog,"Phong Shading");
+    showSurfaceToggle->setBorderWidth(0.0f);
+    showSurfaceToggle->setMarginWidth(0.0f);
+    showSurfaceToggle->setHAlignment(GLFont::Left);
+    showSurfaceToggle->setToggle(LightFlag);
+    showSurfaceToggle->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgToggleChangeCallback);
+
+    new GLMotif::Blind("Blind1",renderDialog);
+
+    new GLMotif::Label("AmbientLabel",renderDialog,"AmbientCoE");
+
+    GLMotif::Slider* ambientCoeSlider=new GLMotif::Slider("AmbientSlider",renderDialog,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    ambientCoeSlider->setValueRange(0.0,1.0,0.001);
+    ambientCoeSlider->setValue(ambinetCoE);
+    ambientCoeSlider->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgSlideChangeCallback);
+
+    new GLMotif::Label("specularLabel",renderDialog,"specularCoE");
+
+    GLMotif::Slider* specularCoeSlider=new GLMotif::Slider("SpecularSlider",renderDialog,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    specularCoeSlider->setValueRange(0.0,1.0,0.001);
+    specularCoeSlider->setValue(specularCoE);
+    specularCoeSlider->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgSlideChangeCallback);
+
+    new GLMotif::Label("diffuseLabel",renderDialog,"diffuseCoE");
+
+    GLMotif::Slider* diffuseCoeSlider=new GLMotif::Slider("DiffuseSlider",renderDialog,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    diffuseCoeSlider->setValueRange(0.0,1.0,0.001);
+    diffuseCoeSlider->setValue(diffuseCoE);
+    diffuseCoeSlider->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgSlideChangeCallback);
+
+    new GLMotif::Blind("Blind1",renderDialog);
+
+    new GLMotif::Label("stepSizeLabel",renderDialog,"Step Size");
+
+    GLMotif::Slider* stepSizeSlider=new GLMotif::Slider("StepSizeSlider",renderDialog,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    stepSizeSlider->setValueRange(0.5,2.0,0.001);
+    stepSizeSlider->setValue(stepSize);
+    stepSizeSlider->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgSlideChangeCallback);
+
+    renderDialog->manageChild();
+
+    return renderDialogPopup;
 }
 
 void RayCastingVis::initDataItem(RayCastingVis::DataItem* dataItem) const
@@ -288,9 +363,10 @@ void RayCastingVis::initShader(RayCastingVis::DataItem* dataItem) const
     dataItem->eyePositionLoc=dataItem->shader.getUniformLocation("eyePosition");
     dataItem->stepSizeLoc=dataItem->shader.getUniformLocation("stepSize");
 
-    /* Get the shader's uniform locations: */
     dataItem->volumeSamplerLoc=dataItem->shader.getUniformLocation("volumeSampler");
     dataItem->colorMapSamplerLoc=dataItem->shader.getUniformLocation("colorMapSampler");
+
+    dataItem->lightFlagLoc=dataItem->shader.getUniformLocation("lightFlag");
 
     }
 
@@ -319,6 +395,15 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
 
     /* Set the sampling step size: */
     glUniform1fARB(dataItem->stepSizeLoc,stepSize*cellSize);
+
+    /* Set the light shading flag bool value */
+    glUniform1iARB(dataItem->lightFlagLoc,LightFlag);
+
+    /* light setting coefficient*/
+    glUniform1fARB(dataItem->shader.getUniformLocation("ambientCoE"),ambinetCoE);
+    glUniform1fARB(dataItem->shader.getUniformLocation("specularCoE"),specularCoE);
+    glUniform1fARB(dataItem->shader.getUniformLocation("diffuseCoE"),diffuseCoE);
+
 
     /* Bind the volume texture: */
     glActiveTextureARB(GL_TEXTURE1_ARB);
@@ -415,6 +500,12 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     transFuncEditor=new PaletteEditor;
     transFuncEditor->getColorMapChangedCallbacks().add(this,&RayCastingVis::TransferFuncEditorCallback);
 //    transFuncEditor->getSavePaletteCallbacks().add(this,&RayCastingVis::savePaletteCallback);
+    RenderSettingDlg = createRenderSettingDlg();
+
+    //initial interface parameter
+    ambinetCoE = 0.6;
+    specularCoE = 0.6;
+    diffuseCoE = 0.5;
 
     //Debug Report
      std::cout<<"Construct RayCastingVis"<<std::endl;
@@ -436,7 +527,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     cellSize=Math::sqrt(cellSize);
 
     // initial data
-    const char* datasetName = "bin/data/bonsai.raw";
+    const char* datasetName = "bin/data/BostonTeapot.raw";
     int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
     /*load sample data*/
     volumeData.resize(volumesize);
@@ -458,6 +549,9 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     colorMap->changeTransparency(stepSize*transparencyGamma);
     colorMap->premultiplyAlpha();
     transparencyGamma = 1.0f;
+
+    /* interface parameter initialization */
+    LightFlag = false;
     }
 
 RayCastingVis::~RayCastingVis(void)
@@ -486,9 +580,9 @@ void RayCastingVis::initContext(GLContextData& contextData) const
     try
         {
         /* Load and compile the vertex program: */
-        std::string vertexShaderName="bin/Shaders/SingleChannelRaycaster.vs";
+        std::string vertexShaderName="bin/Shaders/SingleChannelRaycaster.vert";
         dataItem->shader.compileVertexShader(vertexShaderName.c_str());
-        std::string fragmentShaderName="bin/Shaders/SingleChannelRaycaster.fs";
+        std::string fragmentShaderName="bin/Shaders/SingleChannelRaycaster.frag";
         dataItem->shader.compileFragmentShader(fragmentShaderName.c_str());
         dataItem->shader.linkShader();
 
@@ -512,7 +606,7 @@ void RayCastingVis::initContext(GLContextData& contextData) const
          dataItem->preIntShader.linkShader();
 
          /* Initialize the raycasting shader: */
-         initShader(dataItem);
+         dataItem->initialPreIntBuffer(colorMap);
          }
      catch(std::runtime_error err)
          {
@@ -521,21 +615,30 @@ void RayCastingVis::initContext(GLContextData& contextData) const
          }
      /* Check if the vertex buffer object extension is supported: */
 
-     if(dataItem->vertexBufferObjectID>0)
-         {
-         std::vector<Point2D> preIntVertices;
-         preIntVertices.push_back(Point2D(-1.0,-1.0));
-         preIntVertices.push_back(Point2D(-1.0,1.0));
-         preIntVertices.push_back(Point2D(1.0,1.0));
-         preIntVertices.push_back(Point2D(1.0,-1.0));
-         /* Create a vertex buffer object to store the points' coordinates: */
-         glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
-         glBufferDataARB(GL_ARRAY_BUFFER_ARB,preIntVertices.size()*sizeof(Point2D),0,GL_STATIC_DRAW_ARB);
+//     if(dataItem->vertexBufferObjectID>0)
+//         {
+//         std::vector<Point2D> preIntVertices;
+//         preIntVertices.push_back(Point2D(-1.0,-1.0));
+//         preIntVertices.push_back(Point2D(-1.0,1.0));
+//         preIntVertices.push_back(Point2D(1.0,1.0));
+//         preIntVertices.push_back(Point2D(1.0,-1.0));
+//         /* Create a vertex buffer object to store the points' coordinates: */
+//         glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
+//         glBufferDataARB(GL_ARRAY_BUFFER_ARB,preIntVertices.size()*sizeof(Point2D),0,GL_STATIC_DRAW_ARB);
 
-         /* Protect the vertex buffer object: */
-         glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
-         }
+//         /* Protect the vertex buffer object: */
+//         glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
+//         }
     }
+
+void DrawTriangle()
+{
+    glBegin(GL_TRIANGLES);
+        glVertex2f(0.0f,1.0f);
+        glVertex2f(-1.0f,-1.0f);
+        glVertex2f(1.0f,-1.0f);
+    glEnd();
+}
 
 void RayCastingVis::glRenderAction(GLContextData& contextData) const
     {
@@ -592,7 +695,8 @@ void RayCastingVis::glRenderAction(GLContextData& contextData) const
     GLShader::disablePrograms();
 
     //test draw pre-intgretion texture
-    drawPreIntTexture(dataItem);
+//    drawPreIntTexture(contextData);
+
     /* Clean up: */
     delete clippedDomain;
 
@@ -615,6 +719,26 @@ void RayCastingVis::setTransparencyGamma(GLfloat newTransparencyGamma)
     transparencyGamma=newTransparencyGamma;
     }
 
+void RayCastingVis::loadDataSet(char *datafileName, int sizeX, int sizeY, int sizeZ)
+{
+    // initial data
+//    const char* datasetName = "bin/data/BostonTeapot.raw";
+    int volumesize = sizeX*sizeY*sizeZ;
+    /*load sample data*/
+    volumeData.resize(volumesize);
+    std::ifstream ifs(datafileName, std::ios::binary);
+
+    std::cout<<"open dataset file: "<<datafileName<<std::endl;
+    if(!ifs.is_open())
+      {
+        /* fail to open dataset file */
+        Misc::throwStdErr("fail to open dataset file:");
+        return;
+      }
+    ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize);
+    ifs.close();
+}
+
 void RayCastingVis::frame()
 {
 
@@ -634,13 +758,29 @@ void RayCastingVis::TransferFuncEditorCallback(Misc::CallbackData *cbData)
      std::cout<<"export ColorMap"<<std::endl;
     Vrui::requestUpdate();
 }
-void RayCastingVis::showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
+void RayCastingVis::menuToggleSelectCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
 {
     /* Hide or show palette editor based on toggle button state: */
-    if(cbData->set)
-        Vrui::popupPrimaryWidget(transFuncEditor);
-    else
-        Vrui::popdownPrimaryWidget(transFuncEditor);
+    if(strcmp(cbData->toggle->getName(),"ShowPaletteEditorToggle")==0)
+    {
+        if(cbData->set)
+            Vrui::popupPrimaryWidget(transFuncEditor);
+        else
+            Vrui::popdownPrimaryWidget(transFuncEditor);
+    }
+    else if(strcmp(cbData->toggle->getName(),"ShowRenderSettingToggle")==0)
+    {
+        if(cbData->set)
+            {
+            /* Open the render dialog at the same position as the main menu: */
+            Vrui::popupPrimaryWidget(RenderSettingDlg);
+            }
+        else
+            {
+            /* Close the render dialog: */
+            Vrui::popdownPrimaryWidget(RenderSettingDlg);
+            }
+    }
 }
 void RayCastingVis::savePaletteCallback(Misc::CallbackData* cbData)
 {
@@ -657,9 +797,84 @@ void RayCastingVis::savePaletteCallback(Misc::CallbackData* cbData)
             }
         }
 }
+void RayCastingVis::renderDialogCloseCallback(Misc::CallbackData* cbData)
+{
+//	showRenderDialogToggle->setToggle(false);
+}
+void RayCastingVis::renderDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCallbackData* cbData)
+{
+    if(strcmp(cbData->slider->getName(),"AmbientSlider")==0)
+    {
+//		surfaceTransparent=cbData->value<1.0;
+        ambinetCoE = cbData->value;
+        std::cout<<"set ambient coefficient"<<std::endl;
+    }
+    else if(strcmp(cbData->slider->getName(),"SpecularSlider")==0)
+    {
+        specularCoE = cbData->value;
+        std::cout<<"set specular coefficient"<<std::endl;
+    }
+    else if(strcmp(cbData->slider->getName(),"DiffuseSlider")==0)
+    {
+        diffuseCoE = cbData->value;
+        std::cout<<"set diffuse coefficient"<<std::endl;
+    }
+    else if(strcmp(cbData->slider->getName(),"StepSizeSlider")==0)
+    {
+        stepSize = cbData->value;
+        std::cout<<"set step size"<<std::endl;
+    }
+}
+
+void RayCastingVis::renderDlgToggleChangeCallback(GLMotif::ToggleButton::ValueChangedCallbackData *cbData)
+{
+    if(strcmp(cbData->toggle->getName(),"lightFlag")==0)
+    {
+        LightFlag=cbData->set;
+        std::cout<<"Light Setting change"<<std::endl;
+    }
+
+}
+
+void RayCastingVis::loadElementsCallback(Misc::CallbackData*)
+    {
+
+        /* Create a file selection dialog to select an element file: */
+        GLMotif::FileSelectionDialog* fsDialog=new GLMotif::FileSelectionDialog(Vrui::getWidgetManager(),"Load Visualization Elements...",Vrui::openDirectory("./data"),".raw");
+        fsDialog->getOKCallbacks().add(this,&RayCastingVis::loadElementsOKCallback);
+        fsDialog->getCancelCallbacks().add(this,&RayCastingVis::loadElementsCancelCallback);
+        Vrui::popupPrimaryWidget(fsDialog);
+    }
+
+void RayCastingVis::loadElementsOKCallback(GLMotif::FileSelectionDialog::OKCallbackData* cbData)
+    {
+    try
+        {
+        /* Determine the type of the element file: */
+        if(Misc::hasCaseExtension(cbData->selectedFileName,".raw"))
+            {
+            /* Load the ASCII elements file: */
+//            loadElements(cbData->selectedDirectory->getPath(cbData->selectedFileName).c_str(),true);
+            }
+        }
+    catch(std::runtime_error err)
+        {
+        std::cerr<<"Caught exception "<<err.what()<<" while loading element file"<<std::endl;
+        }
+
+    /* Destroy the file selection dialog: */
+    Vrui::getWidgetManager()->deleteWidget(cbData->fileSelectionDialog);
+    }
+
+void RayCastingVis::loadElementsCancelCallback(GLMotif::FileSelectionDialog::CancelCallbackData* cbData)
+    {
+    /* Destroy the file selection dialog: */
+    Vrui::getWidgetManager()->deleteWidget(cbData->fileSelectionDialog);
+    }
+
 void RayCastingVis::bindPreIntShader(DataItem *dataItem) const
 {
-    dataItem->initialPreIntBuffer(colorMap);
+//    dataItem->initialPreIntBuffer(colorMap);
     /* Set the sampling step size: */
     glUniform1fARB(dataItem->deltastepLoc,stepSize*cellSize);
     glUniform1fARB(dataItem->OCSizeLoc,stepSize*cellSize);
@@ -684,17 +899,37 @@ void RayCastingVis::unbindPreIntShader(DataItem *dataItem) const
     glActiveTextureARB(GL_TEXTURE2_ARB);
     glBindTexture(GL_TEXTURE_2D,0);
 }
-void RayCastingVis::drawPreIntTexture(DataItem* dataItem) const
+void RayCastingVis::drawPreIntTexture(GLContextData& contextData) const
 {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->preIntFramebufferID);
-    dataItem->preIntShader.useProgram();
-    bindPreIntShader(dataItem);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
-    glDrawArrays(GL_TRIANGLE_FAN,0,4);
-    glBindBufferARB(GL_ARRAY_BUFFER, 0);
-    unbindPreIntShader(dataItem);
-    GLShader::disablePrograms();
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+    DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
+    const Vrui::DisplayState& vds=Vrui::getDisplayState(contextData);
+    if(dataItem->vertexBufferObjectID>0)
+    {
+        std::vector<Point2D> preIntVertices;
+        preIntVertices.push_back(Point2D(-1.0,-1.0));
+        preIntVertices.push_back(Point2D(-1.0,1.0));
+        preIntVertices.push_back(Point2D(1.0,1.0));
+        preIntVertices.push_back(Point2D(1.0,-1.0));
+
+        int width = vds.viewport[0];
+        int height = vds.viewport[1];
+//        std::cout<<"Screen viewport change: "<<width<<" "<<height<<std::endl;
+        glViewport(0,0,256,256);
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,dataItem->preIntFramebufferID);
+        glDisable(GL_BLEND);
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+        dataItem->preIntShader.useProgram();
+        bindPreIntShader(dataItem);
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB,dataItem->vertexBufferObjectID);
+        glBufferDataARB(GL_ARRAY_BUFFER_ARB,preIntVertices.size()*sizeof(Point2D),0,GL_STATIC_DRAW_ARB);
+        glDrawArrays(GL_TRIANGLE_FAN,0,4);
+        glBindBufferARB(GL_ARRAY_BUFFER, 0);
+        unbindPreIntShader(dataItem);
+        GLShader::disablePrograms();
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+        glEnable(GL_BLEND);
+        glViewport(vds.viewport[0],vds.viewport[1],vds.viewport[2],vds.viewport[3]);
+    }
 }
 
 VRUI_APPLICATION_RUN(RayCastingVis)

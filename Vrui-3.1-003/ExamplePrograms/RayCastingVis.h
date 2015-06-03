@@ -72,6 +72,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
         bool usePreIntegration; // Flag whether use pre integeted transfer function
         GLuint preIntTextureID;
         GLuint preIntFramebufferID;
+        GLenum colAtt;
         GLShader preIntShader;
 
         bool haveFloatTextures; // Flag whether the local OpenGL supports floating-point textures
@@ -89,6 +90,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
         int depthSizeLoc; // Location of the depth texture size uniform variable
         int eyePositionLoc; // Location of the eye position uniform variable
         int stepSizeLoc; // Location of the step size uniform variable
+
+        int lightFlagLoc; // Location of the light flag variable
 
         /* Constructors and destructors: */
         DataItem(void);
@@ -120,11 +123,24 @@ class RayCastingVis:public Vrui::Application,public GLObject
     /* Interface Element */
     GLMotif::PopupMenu* mainMenu; // The main menu widget
     GLMotif::ToggleButton* showPaletteEditorToggle; // Toggle button to show the palette editor
+    GLMotif::ToggleButton* showRenderSettiingToggle; // Toggle button to show the render setting dialog
+    GLMotif::ToggleButton* PhongReflectionToggle; // Toggle button to control phong shading lighting
+
+    GLMotif::PopupWindow* RenderSettingDlg;
 
     PaletteEditor* transFuncEditor;
 
+    /* Interface Parameter */
+    bool LightFlag;
+    float ambinetCoE;
+    float specularCoE;
+    float diffuseCoE;
+//    float stepSize;
+
     /* Private methods: */
+    private:
     GLMotif::PopupMenu* createMainMenu(void);
+    GLMotif::PopupWindow* createRenderSettingDlg(void);
     /* Protected methods: */
     protected:
     virtual void initDataItem(DataItem* dataItem) const; // Initializes the given context data item
@@ -179,16 +195,23 @@ class RayCastingVis:public Vrui::Application,public GLObject
     virtual void updateData(void); // Notifies the raycaster that the volume dataset has changed
     void setColorMap(GLColorMap* newColorMap); // Sets the raycaster's color map
     void setTransparencyGamma(GLfloat newTransparencyGamma); // Sets the opacity adjustment factor
+    void loadDataSet(char * datafileName, int sizeX, int sizeY, int sizeZ);
 
     /* Callback Function */
     void TransferFuncEditorCallback(Misc::CallbackData* cbData);
-    void showPaletteEditorCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
+    void menuToggleSelectCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
     void savePaletteCallback(Misc::CallbackData* cbData);
+    void renderDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCallbackData* cbData);
+    void renderDlgToggleChangeCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
+    void renderDialogCloseCallback(Misc::CallbackData* cbData);
+    void loadElementsCallback(Misc::CallbackData*);
+    void loadElementsOKCallback(GLMotif::FileSelectionDialog::OKCallbackData* cbData);
+    void loadElementsCancelCallback(GLMotif::FileSelectionDialog::CancelCallbackData* cbData);
 
     /* Pre Integreted transfer function Method*/
     void bindPreIntShader(DataItem* dataItem) const;
     void unbindPreIntShader(DataItem* dataItem)const;
-    void drawPreIntTexture(DataItem* dataItem) const;
+    void drawPreIntTexture(GLContextData& contextData) const;
 };
 
 #endif // RAYCASTINGVIS_H
