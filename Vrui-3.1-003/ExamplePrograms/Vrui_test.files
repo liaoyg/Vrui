@@ -152,3 +152,6 @@ bin/Shaders/PreIntegration.frag
 ShowEarthModel.cpp
 ShowEarthModel.h
 Animation.cpp
+pointcloudvis.h
+pointcloudvis.cpp
+PointCloudPreProcessor.cpp

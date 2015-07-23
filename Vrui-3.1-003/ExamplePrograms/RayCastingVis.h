@@ -20,6 +20,7 @@
 
 #include "Polyhedron.h"
 #include "PaletteEditor.h"
+#include "pointcloudvis.h"
 
 /* Forward declarations: */
 namespace GLMotif {
@@ -106,6 +107,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
     /* Elements: */
     protected:
     std::vector<unsigned char> volumeData;
+    PointCloudVis* pointVolume;
+    int pointCloudSize;
     Voxel* data;
     unsigned int dataVersion; // Version number of the volume dataset to track changes
     GLColorMap* colorMap; // Pointer to the color map

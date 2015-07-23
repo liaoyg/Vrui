@@ -417,8 +417,10 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
         //Debug Report
          std::cout<<"Update volume texture version"<<dataVersion<<std::endl;
           std::cout<<"datasize: "<<dataSize[0]<<" "<< dataItem->textureSize[0]<<std::endl;
-         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
-                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,volumeData.data());
+//         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
+//                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,volumeData.data());
+          glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,pointCloudSize,pointCloudSize,
+                   pointCloudSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr());
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -494,6 +496,36 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
      domainExtent(0),cellSize(0),stepSize(2),
      mainMenu(0),transFuncEditor(0)
     {
+    //Load datasrc path
+    const char* rangeFileName=0;
+    const char* dataSrcFileName = 0;
+    pointCloudSize = 50;
+    for(int i=1;i<argc;++i)
+        {
+        /* Check if the current command line argument is a switch or a file name: */
+        if(argv[i][0]=='-')
+            {
+            /* Determine the kind of switch and change the file mode: */
+            if(strcasecmp(argv[i]+1,"range")==0)
+            {
+                ++i;
+                if(i<argc)
+                    rangeFileName = argv[i];
+            }
+            else if(strcasecmp(argv[i]+1,"pos")==0)
+            {
+                ++i;
+                if(i<argc)
+                    dataSrcFileName = argv[i];
+            }
+        }
+    }
+    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
+    pointVolume = new PointCloudVis(rangeFileName, dataSrcFileName, pointCloudSize);
+
+
+
+
     //initial interface
     mainMenu = createMainMenu();
     Vrui::setMainMenu(mainMenu);
@@ -543,6 +575,8 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize);
     ifs.close();
 
+    std::cout<<"volumedata: "<<volumeData.front()<<std::endl;
+
     //data = new Voxel[dataSize[0]*dataSize[1]*dataSize[2]];
     dataVersion = 1;
     colorMap = new GLColorMap(GLColorMap::RAINBOW|GLColorMap::RAMP_ALPHA,1.0f,1.0f,1.0,100.0);
@@ -557,6 +591,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 RayCastingVis::~RayCastingVis(void)
     {
 //    delete[] data;
+    delete pointVolume;
     }
 
 void RayCastingVis::setStepSize(RayCastingVis::Scalar newStepSize)
