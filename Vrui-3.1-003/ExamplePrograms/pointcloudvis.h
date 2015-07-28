@@ -73,6 +73,7 @@ public:
     virtual ~PointCloudVis(void);
 
     float* getVolumeDataPtr(const string elementName);
+    void RefreshVolumeData(const int pointSize);
 };
 
 #endif // POINTCLOUDVIS_H
