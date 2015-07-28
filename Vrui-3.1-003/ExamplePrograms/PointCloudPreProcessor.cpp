@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 #include <string>
 #include <GL/GLColor.h>
 #include <Geometry/Point.h>
@@ -33,16 +34,16 @@ struct IonNode
     ionColor color;
 };
 
-struct DensityNode
-{
-    float x,y,z;
-    vector<ElementIntensity> intensityList;
-};
-
 struct ElementIntensity
 {
     string elementName;
     float intensity;
+};
+
+struct DensityNode
+{
+    float x,y,z;
+    vector<ElementIntensity> intensityList;
 };
 
  vector<IonNode> InputRangeFile(const char *filename)
@@ -134,7 +135,7 @@ struct ElementIntensity
     return rangeFileList;
 }
 
-void LoadPosData(const char* filename, vector<DensityNode>& nodeList, Box& boundingBox)
+void LoadPosData(const char* filename, vector<DensityNode>& nodeList, vector<IonNode>& rangeFileList, Box& boundingBox)
 {
     ifstream inputFile;
     inputFile.open(filename);
@@ -168,15 +169,15 @@ void LoadPosData(const char* filename, vector<DensityNode>& nodeList, Box& bound
         }
 
 
-        for(int i = 0; i < IonRangeList.size(); i++)
+        for(int i = 0; i < rangeFileList.size(); i++)
         {
-            if(fvalue[3] >= IonRangeList[i].minMass && fvalue[3] <= IonRangeList[i].maxMass)
+            if(fvalue[3] >= rangeFileList[i].minMass && fvalue[3] <= rangeFileList[i].maxMass)
             {
-                for(int j = 0; j < IonRangeList[i].elementList.size(); j++)
+                for(int j = 0; j < rangeFileList[i].elementList.size(); j++)
                 {
                     ElementIntensity tempEleInt;
-                    tempEleInt.elementName = IonRangeList[i].elementList[j].elementName;
-                    tempEleInt.intensity = IonRangeList[i].elementList[j].intensity;
+                    tempEleInt.elementName = rangeFileList[i].elementList[j].elementName;
+                    tempEleInt.intensity = rangeFileList[i].elementList[j].intensity;
                     tempNode.intensityList.push_back(tempEleInt);
                 }
                 break;
@@ -188,39 +189,95 @@ void LoadPosData(const char* filename, vector<DensityNode>& nodeList, Box& bound
 }
 
 
-void GenerateVolumeData(const int size, vector<DensityNode> densityMap, const string elementName, const string outputPath)
+void GenerateVolumeDataAlt(const int size, vector<DensityNode>& densityMap, Box& boundingBox, const string elementName, const string outputPath)
 {
-    int x,y,z;
-    float totaleleNum[size][size][size];
-    float usefuleleNum[size][size][size];
-    for(int i = 0; i < size; i++)
-        for(int j = 0; j < size; j++)
-            for(int k = 0; k < size; k++)
+    float lengthX = boundingBox.max[0]-boundingBox.min[0];
+    float lengthY = boundingBox.max[1]-boundingBox.min[1];
+    float lengthZ = boundingBox.max[2]-boundingBox.min[2];
+    int sizeX = size;
+    int sizeY = lengthY*size/lengthX;
+    int sizeZ = lengthZ*size/lengthX;
+
+    ofstream output;
+    string outputFilePath = outputPath + elementName + ".raw";
+    output.open(outputFilePath.c_str());
+
+    for(int i = 0; i< sizeX; i++)
+        for(int j = 0; j< sizeY; j++)
+            for(int k = 0; k< sizeX; k++)
             {
-                totaleleNum[i][j][k] = 0;
-                usefuleleNum[i][j][k] = 0;
+                float elementIntAcum = 0.0f;
+                float totalIntAcum = 0.0f;
+                for(int n = 0; n < densityMap.size(); n++)
+                {
+
+                    if((densityMap[n].x >= (float)i*lengthX/sizeX && densityMap[n].x < (float)(i+1)*lengthX/sizeX)
+                       && (densityMap[n].y >= (float)j*lengthY/sizeY && densityMap[n].y < (float)(j+1)*lengthY/sizeY)
+                       && (densityMap[n].z >= (float)k*lengthZ/sizeZ && densityMap[n].z < (float)(k+1)*lengthZ/sizeZ))
+                    {
+                        totalIntAcum += 1.0f;
+                        for(int m = 0; m < densityMap[n].intensityList.size(); m++)
+                        {
+                            if(strcmp(densityMap[n].intensityList[m].elementName.c_str(), elementName.c_str()))
+                                elementIntAcum += densityMap[n].intensityList[m].intensity;
+                        }
+                    }
+
+                }
+
+                float temp;
+                if(totalIntAcum == 0)
+                    temp = 0.0f;
+                else
+                    temp = elementIntAcum/totalIntAcum;
+                output<<setprecision(6)<<temp;
             }
-//    cout<<CaDensityMap.size()<<" ca size"<<endl;
+}
+
+void GenerateVolumeData(const int size, vector<DensityNode>& densityMap, Box& boundingBox, const string elementName, const string outputPath)
+{
+    const float lengthX = boundingBox.max[0]-boundingBox.min[0];
+    const float lengthY = boundingBox.max[1]-boundingBox.min[1];
+    const float lengthZ = boundingBox.max[2]-boundingBox.min[2];
+    const int sizeX = size;
+    const int sizeY = lengthY*size/lengthX;
+    const int sizeZ = lengthZ*size/lengthX;
+//    const int sizeY = size;
+//    const int sizeZ = size;
+    cout<<"dataset size: "<<sizeX<<" "<<sizeY<<" "<<sizeZ<<endl;
+    int x,y,z;
+    float* totaleleNum;
+    float* usefuleleNum;
+    usefuleleNum = new float[sizeX*sizeY*sizeZ+1];
+    totaleleNum = new float[sizeX*sizeY*sizeZ+1];
+
+    for(int i = 0; i < sizeX; i++)
+        for(int j = 0; j < sizeY; j++)
+            for(int k = 0; k < sizeZ; k++)
+            {
+                totaleleNum[i + j * sizeX + k * sizeY * sizeX] = 0;
+                totaleleNum[i + j * sizeX + k * sizeY * sizeX]  = 0;
+            }
+
     for(int i = 0; i < densityMap.size(); i++)
     {
-        x = (densityMap[i].x-boundingBox.min[0])*size/(boundingBox.max[0]-boundingBox.min[0]);
-        y = (densityMap[i].y-boundingBox.min[1])*size/(boundingBox.max[1]-boundingBox.min[1]);
-        z = (densityMap[i].z-boundingBox.min[2])*size/(boundingBox.max[2]-boundingBox.min[2]);
-//        cout<<CaDensityMap[i].x<<" min:"<<boundingBox.min[0]<<" "<<boundingBox.max[0]<<endl;
-//        cout<<x<<" "<<y<<" "<<z<<" "<<CaDensityMap[i].intensity<<endl;
+        x = (densityMap[i].x-boundingBox.min[0])*(sizeX-1)/(boundingBox.max[0]-boundingBox.min[0]);
+        y = (densityMap[i].y-boundingBox.min[1])*(sizeY-1)/(boundingBox.max[1]-boundingBox.min[1]);
+        z = (densityMap[i].z-boundingBox.min[2])*(sizeZ-1)/(boundingBox.max[2]-boundingBox.min[2]);
+
         for(int j = 0; j < densityMap[i].intensityList.size(); j++)
         {
             if(strcmp(densityMap[i].intensityList[j].elementName.c_str(), elementName.c_str()))
-                usefuleleNum[x][y][z] += densityMap[i].intensityList[j].intensity;
-            totaleleNum[x][y][z] += 1.0f;
+                usefuleleNum[x + y * sizeX + z * sizeY * sizeX] += densityMap[i].intensityList[j].intensity;
         }
+            totaleleNum[x + y * sizeX + z * sizeY * sizeX] += 1.0f;
     }
-    volumeData = (float *)malloc(size*size*size*sizeof(float));
+//    volumeData = (float *)malloc(size*size*size*sizeof(float));
 //    volumeData.resize(size*size*size);
     int nonZero = 0;
 
     ofstream output;
-    string outputFilePath = outputPath+"/"+elementName + ".raw";
+    string outputFilePath = outputPath + elementName + ".raw";
     output.open(outputFilePath.c_str());
 
     for(int i = 0; i < size; i++)
@@ -228,20 +285,59 @@ void GenerateVolumeData(const int size, vector<DensityNode> densityMap, const st
             for(int k = 0; k < size; k++)
             {
                 float temp;
-                if(totaleleNum[i][j][k] == 0)
+                if(totaleleNum[i + j * sizeX + k * sizeY * sizeX] == 0)
                     temp = 0.0f;
                 else
-                    temp = usefuleleNum[i][j][k]/totaleleNum[i][j][k];
+                    temp = usefuleleNum[i + j * sizeX + k * sizeY * sizeX]/totaleleNum[i + j * sizeX + k * sizeY * sizeX];
 //                volumeData[i+j*size+k*size*size] = temp;
-                output<<setprecision(6)<<temp;
+                if(temp > 0)
+                {
+//                    cout<<temp<<endl;
+                    nonZero++;
+                }
+//                output<<temp;
+                output.write((char*)(&temp), sizeof(float));
             }
+    cout<<"nonzero: "<<nonZero<<endl;
+    cout<<"output volume data: "<<outputFilePath<<endl;
+}\
 
+vector<string> outputElementIndex(const string outputPath, vector<DensityNode>& elementDensityMap)
+{
+    vector<string> elementList;
+    if(elementDensityMap.size() == 0)
+        return elementList;
+
+    for(int i = 0; i < elementDensityMap.size(); i++)
+        for(int k = 0; k < elementDensityMap[i].intensityList.size(); k++)
+        {
+            bool isFound = false;
+            for(int j =0 ;j < elementList.size();j++)
+            {
+                if(strcmp(elementDensityMap[i].intensityList[k].elementName.c_str(), elementList[j].c_str())==0)
+                    isFound = true;
+            }
+            if(!isFound)
+                elementList.push_back(elementDensityMap[i].intensityList[k].elementName);
+        }
+
+    ofstream output;
+    string outputFilePath = outputPath + "element.index";
+    output.open(outputFilePath.c_str());
+
+    for(int i = 0; i < elementList.size(); i++)
+    {
+        output<<elementList[i]<<endl;
+    }
+
+    return elementList;
 }
 
 int main(int argc,char* argv[])
 {
-    const char* rangeFileName=0;
+    const char* rangeFileName = 0;
     const char* dataSrcFileName = 0;
+    const char* outputPath = 0;
 
     for(int i=1;i<argc;++i)
         {
@@ -261,13 +357,25 @@ int main(int argc,char* argv[])
                 if(i<argc)
                     dataSrcFileName = argv[i];
             }
+            else if(strcasecmp(argv[i]+1,"o")==0)
+            {
+                ++i;
+                if(i<argc)
+                    outputPath = argv[i];
+            }
         }
     }
     Box boundingBox = Box(Point(0,0,0),Point(1,1,1));
     vector<IonNode> rangeFile = InputRangeFile(rangeFileName);
     vector<DensityNode> elementDensityMap;
-    LoadPosData(dataSrcFileName,elementDensityMap, boundingBox);
+    LoadPosData(dataSrcFileName,elementDensityMap, rangeFile, boundingBox);
 
+    //output element Index
+    vector<string> elementList = outputElementIndex(outputPath,elementDensityMap);
 
+    //output volume data file
+    for(int i = 0; i < elementList.size(); i++)
+        GenerateVolumeData(2, elementDensityMap, boundingBox, elementList[i], outputPath);
+//    GenerateVolumeData(128, elementDensityMap, boundingBox, "Na", outputPath);
 
 }

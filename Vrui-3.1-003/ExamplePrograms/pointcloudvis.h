@@ -15,6 +15,7 @@ struct ElementNode
 {
     string elementName;
     int elementNum;
+    float intensity;
 };
 
 struct IonNode
@@ -27,10 +28,23 @@ struct IonNode
     ionColor color;
 };
 
+struct ElementIntensity
+{
+    string elementName;
+    float intensity;
+};
+
 struct DensityNode
 {
     float x,y,z;
-    float intensity;
+    vector<ElementIntensity> intensityList;
+};
+
+struct VolumeDataNode
+{
+    string elementName;
+    int volumeSizeX,volumeSizeY,volumeSizeZ;
+    float* volumeData;
 };
 
 class PointCloudVis
@@ -42,21 +56,23 @@ public:
     typedef Geometry::Box<Scalar,3> Box;
 private:
     vector<IonNode> IonRangeList;
-    vector<DensityNode> CaDensityMap;
+    vector<DensityNode> elementDensityMap;
     Box boundingBox;
 //    float volumeData[128][128][128];
-    float* volumeData;
+    vector<VolumeDataNode> volumeDataList;
+    vector<string> elementList;
 //    std::vector<unsigned char> volumeData;
     int pointVolumeSize;
 
-    vector<IonNode> InputRangeFile(const char* filename);
-    void LoadPosData(const char* filename, const string eleName, vector<DensityNode>& nodeList, Box& boundingBox);
-    void GenerateVolumeData(const int size);
+    void InputRangeFile(const char* filename);
+    void LoadPosData(const char* filename);
+    void GenerateVolumeData(const int size,const string elementName);
+    void GenerateElementIndex();
 public:
     PointCloudVis(const char* rangeFileName, const char* dataSrcFileName, int pointSize);
     virtual ~PointCloudVis(void);
 
-    float* getVolumeDataPtr();
+    float* getVolumeDataPtr(const string elementName);
 };
 
 #endif // POINTCLOUDVIS_H

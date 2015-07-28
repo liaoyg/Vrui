@@ -90,6 +90,7 @@ ALL = $(EXEDIR)/VruiDemo \
       $(EXEDIR)/SharedJello \
       $(EXEDIR)/VirtualClay \
       $(EXEDIR)/RayCastingVis \
+      $(EXEDIR)/PointCloudPreProcessor \
 
 .PHONY: all
 all: $(ALL)
@@ -144,6 +145,8 @@ $(EXEDIR)/ImageViewer: $(OBJDIR)/ImageViewer.o
 $(EXEDIR)/ImageSequenceViewer: $(OBJDIR)/ImageSequenceViewer.o
 
 $(EXEDIR)/VideoViewer: $(OBJDIR)/VideoViewer.o
+
+$(EXEDIR)/PointCloudPreProcessor: $(OBJDIR)/PointCloudPreProcessor.o
 
 #
 # ShowEarthModel, a viewer for earthquake catalogs and other assorted

@@ -416,11 +416,11 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
         /* Upload the new volume data: */
         //Debug Report
          std::cout<<"Update volume texture version"<<dataVersion<<std::endl;
-          std::cout<<"datasize: "<<dataSize[0]<<" "<< dataItem->textureSize[0]<<std::endl;
+          std::cout<<"bind datasize: "<<volumeData.size()<<" "<<dataSize[2]<<" "<<dataSize[0]<<" "<<dataSize[1]<<" "<< dataItem->textureSize[0]<<" "<< dataItem->textureSize[1]<<" "<< dataItem->textureSize[2]<<std::endl;
 //         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
-//                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,volumeData.data());
+//                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_FLOAT,volumeData.data());
           glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,pointCloudSize,pointCloudSize,
-                   pointCloudSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr());
+                   pointCloudSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr("Ca"));
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -499,7 +499,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     //Load datasrc path
     const char* rangeFileName=0;
     const char* dataSrcFileName = 0;
-    pointCloudSize = 50;
+    pointCloudSize = 100;
     for(int i=1;i<argc;++i)
         {
         /* Check if the current command line argument is a switch or a file name: */
@@ -520,8 +520,9 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
             }
         }
     }
-    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
+//    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
     pointVolume = new PointCloudVis(rangeFileName, dataSrcFileName, pointCloudSize);
+
 
 
 
@@ -541,7 +542,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 
     //Debug Report
      std::cout<<"Construct RayCastingVis"<<std::endl;
-    const unsigned int sDataSize[3] = {256,256,256};
+    const unsigned int sDataSize[3] = {pointCloudSize,pointCloudSize,pointCloudSize};
     domain = Box(Point(-1,-1,-1),Point(1,1,1));
     renderDomain = Polyhedron<Scalar>(Polyhedron<Scalar>::Point(domain.min),Polyhedron<Scalar>::Point(domain.max));
 
@@ -559,10 +560,11 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     cellSize=Math::sqrt(cellSize);
 
     // initial data
-    const char* datasetName = "bin/data/BostonTeapot.raw";
+    const char* datasetName = "/home/leo/src/Data/PointCloudVolume/Ga.raw";
     int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
     /*load sample data*/
     volumeData.resize(volumesize);
+    volumeDataPtr = new float[volumesize];
     std::ifstream ifs(datasetName, std::ios::binary);
 
     std::cout<<"open dataset file "<<datasetName<<std::endl;
@@ -572,10 +574,20 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
         Misc::throwStdErr("fail to open dataset file:");
         return;
       }
-    ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize);
+    ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize*sizeof(float));
+//    ifs.read(reinterpret_cast<char *>(volumeDataPtr), volumesize*sizeof(float));
     ifs.close();
 
-    std::cout<<"volumedata: "<<volumeData.front()<<std::endl;
+    std::cout<<"volumedata: "<<volumeData.front()<<" volumedatasize: "<<volumeData.size()<<std::endl;
+//    std::cout<<"volumedata: "<<volumeDataPtr[0]<<" volumedatasize: "<<sizeof(volumeDataPtr)<<std::endl;
+    int vdnum;
+    for(int i = 0; i< volumeData.size();i++)
+        if(volumeData[i]>0)
+        {
+//            cout<<volumeData[i]<<endl;
+            vdnum++;
+        }
+    cout<<"nonZero volume data: "<< vdnum<<endl;
 
     //data = new Voxel[dataSize[0]*dataSize[1]*dataSize[2]];
     dataVersion = 1;

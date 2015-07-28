@@ -106,7 +106,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
 
     /* Elements: */
     protected:
-    std::vector<unsigned char> volumeData;
+    std::vector<float> volumeData;
+    float* volumeDataPtr;
     PointCloudVis* pointVolume;
     int pointCloudSize;
     Voxel* data;
