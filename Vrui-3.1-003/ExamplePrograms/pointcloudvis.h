@@ -44,6 +44,7 @@ struct VolumeDataNode
 {
     string elementName;
     int volumeSizeX,volumeSizeY,volumeSizeZ;
+    int maxSize;
     float* volumeData;
 };
 
@@ -73,6 +74,7 @@ public:
     virtual ~PointCloudVis(void);
 
     float* getVolumeDataPtr(const string elementName);
+    int getVolumeSize(const string elementName);
     void RefreshVolumeData(const int pointSize);
 };
 

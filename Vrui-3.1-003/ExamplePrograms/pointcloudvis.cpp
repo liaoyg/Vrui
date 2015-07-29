@@ -149,6 +149,13 @@ void PointCloudVis::LoadPosData(const char* filename)
     }while(!inputFile.eof());
 }
 
+int FindMaxSizeofThree(int x, int y, int z)
+{
+    int max = x > y ? x:y;
+    max = max > z ? max:z;
+    return max;
+}
+
 void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
 {
     const float lengthX = boundingBox.max[0]-boundingBox.min[0];
@@ -192,19 +199,26 @@ void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
     }
 
     int nonZero = 0;
+    int maxSize = FindMaxSizeofThree(sizeX,sizeY,sizeZ);
+    float* volumeData = new float[maxSize*maxSize*maxSize+1];
+    memset(volumeData,0,(maxSize*maxSize*maxSize+1)*sizeof(float));
+    int offsetX = (maxSize-sizeX)/2;
+    int offsetY = (maxSize-sizeY)/2;
+    int offsetZ = (maxSize-sizeZ)/2;
+    cout<<"offset size of volume: "<< offsetX<<" "<< offsetY<<" "<< offsetZ<<" "<<endl;
 
-    float* volumeData = new float[sizeX*sizeY*sizeZ+1];
-
-    for(int i = 0; i < size; i++)
-        for(int j = 0; j < size; j++)
-            for(int k = 0; k < size; k++)
+    for(int i = 0; i < sizeX; i++)
+        for(int j = 0; j < sizeY; j++)
+            for(int k = 0; k < sizeZ; k++)
             {
+
                 float temp;
                 if(totaleleNum[i + j * sizeX + k * sizeY * sizeX] == 0)
                     temp = 0.0f;
                 else
                     temp = usefuleleNum[i + j * sizeX + k * sizeY * sizeX]/totaleleNum[i + j * sizeX + k * sizeY * sizeX];
-                volumeData[i+j*size+k*size*size] = temp;
+                volumeData[i + offsetX + (j+offsetY) * maxSize + (k+offsetZ) * maxSize * maxSize] = temp;
+//                volumeData[i + j * sizeX + k * sizeY * sizeX] = temp;
                 if(temp > 0)
                     nonZero++;
             }
@@ -214,6 +228,7 @@ void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
     tempNode.volumeSizeX = sizeX;
     tempNode.volumeSizeY = sizeY;
     tempNode.volumeSizeZ = sizeZ;
+    tempNode.maxSize = maxSize;
     volumeDataList.push_back(tempNode);
     cout<<"nonzero: "<<nonZero<<endl;
 }\
@@ -268,6 +283,19 @@ float* PointCloudVis::getVolumeDataPtr(const string elementName)
     {
         if(strcmp(volumeDataList[i].elementName.c_str(), elementName.c_str()) == 0)
             return volumeDataList[i].volumeData;
+    }
+}
+
+int PointCloudVis::getVolumeSize(const string elementName)
+{
+    for(int i = 0 ; i < volumeDataList.size(); i++)
+    {
+        if(strcmp(volumeDataList[i].elementName.c_str(), elementName.c_str()) == 0)
+        {
+            int maxSize = volumeDataList[i].volumeSizeX > volumeDataList[i].volumeSizeY ? volumeDataList[i].volumeSizeX:volumeDataList[i].volumeSizeY;
+            maxSize = maxSize > volumeDataList[i].volumeSizeZ ? maxSize : volumeDataList[i].volumeSizeZ;
+            return maxSize;
+        }
     }
 }
 
