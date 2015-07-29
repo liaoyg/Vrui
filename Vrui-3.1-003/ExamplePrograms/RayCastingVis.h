@@ -109,6 +109,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     std::vector<float> volumeData;
     float* volumeDataPtr;
     PointCloudVis* pointVolume;
+    string currentElement;
     int pointCloudSize;
     Voxel* data;
     unsigned int dataVersion; // Version number of the volume dataset to track changes
@@ -129,8 +130,11 @@ class RayCastingVis:public Vrui::Application,public GLObject
     GLMotif::ToggleButton* showPaletteEditorToggle; // Toggle button to show the palette editor
     GLMotif::ToggleButton* showRenderSettiingToggle; // Toggle button to show the render setting dialog
     GLMotif::ToggleButton* PhongReflectionToggle; // Toggle button to control phong shading lighting
+    GLMotif::ToggleButton* showPointCloudSetteingToggle;
 
     GLMotif::PopupWindow* RenderSettingDlg;
+    GLMotif::PopupWindow* PointCloudsDlg;
+    GLMotif::PopupWindow* ElementListDlg;
 
     PaletteEditor* transFuncEditor;
 
@@ -145,6 +149,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
     private:
     GLMotif::PopupMenu* createMainMenu(void);
     GLMotif::PopupWindow* createRenderSettingDlg(void);
+    GLMotif::PopupWindow* createPointCloudsSettingDlg(void);
+
     /* Protected methods: */
     protected:
     virtual void initDataItem(DataItem* dataItem) const; // Initializes the given context data item

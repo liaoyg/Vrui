@@ -237,6 +237,9 @@ GLMotif::PopupMenu* RayCastingVis::createMainMenu(void)
     showRenderSettiingToggle=new GLMotif::ToggleButton("ShowRenderSettingToggle",mainMenu,"Show Render Setting Dialog");
     showRenderSettiingToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
 
+    showPointCloudSetteingToggle = new GLMotif::ToggleButton("ShowPointCloudsToggle",mainMenu,"Point Clouds Setting Dialog");
+    showPointCloudSetteingToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
+
     mainMenu->manageChild();
 
     return mainMenuPopup;
@@ -299,6 +302,23 @@ GLMotif::PopupWindow* RayCastingVis::createRenderSettingDlg(void)
     return renderDialogPopup;
 }
 
+GLMotif::PopupWindow* RayCastingVis::createPointCloudsSettingDlg(void)
+{
+    const GLMotif::StyleSheet& ss=*Vrui::getWidgetManager()->getStyleSheet();
+
+    GLMotif::PopupWindow* pointDialogPopup=new GLMotif::PopupWindow("PointDialogPopup",Vrui::getWidgetManager(),"Point Clouds Volume Data Settings");
+    pointDialogPopup->setResizableFlags(true,false);
+    pointDialogPopup->setCloseButton(true);
+    pointDialogPopup->getCloseCallbacks().add(this,&RayCastingVis::renderDialogCloseCallback);
+
+    GLMotif::RowColumn* pointCloudsDialog=new GLMotif::RowColumn("PointCloudsDialog",pointDialogPopup,false);
+    pointCloudsDialog->setOrientation(GLMotif::RowColumn::VERTICAL);
+    pointCloudsDialog->setPacking(GLMotif::RowColumn::PACK_TIGHT);
+    pointCloudsDialog->setNumMinorWidgets(2);
+
+    return pointDialogPopup;
+}
+
 void RayCastingVis::initDataItem(RayCastingVis::DataItem* dataItem) const
     {
     //Debug Report
@@ -317,7 +337,7 @@ void RayCastingVis::initDataItem(RayCastingVis::DataItem* dataItem) const
             for(dataItem->textureSize[i]=1;dataItem->textureSize[i]<GLsizei(dataSize[i]);dataItem->textureSize[i]<<=1)
                 ;
         }
-
+cout<<"Calculate volume tex size"<<dataItem->textureSize[0]<<" "<<dataItem->textureSize[1]<<endl;
     /* Calculate the texture coordinate box for trilinear interpolation and the transformation from model space to data space: */
     Point tcMin,tcMax;
     for(int i=0;i<3;++i)
@@ -419,8 +439,9 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
           std::cout<<"bind datasize: "<<volumeData.size()<<" "<<dataSize[2]<<" "<<dataSize[0]<<" "<<dataSize[1]<<" "<< dataItem->textureSize[0]<<" "<< dataItem->textureSize[1]<<" "<< dataItem->textureSize[2]<<std::endl;
 //         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
 //                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_FLOAT,volumeData.data());
-          glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,pointCloudSize,pointCloudSize,
-                   pointCloudSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr("Ca"));
+          int volumedataSize = pointVolume->getVolumeSize(currentElement);
+          glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,volumedataSize,volumedataSize,
+                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr(currentElement));
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -522,10 +543,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     }
 //    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
     pointVolume = new PointCloudVis(rangeFileName, dataSrcFileName, pointCloudSize);
-
-
-
-
+    currentElement = "Ca";
 
     //initial interface
     mainMenu = createMainMenu();
@@ -534,6 +552,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     transFuncEditor->getColorMapChangedCallbacks().add(this,&RayCastingVis::TransferFuncEditorCallback);
 //    transFuncEditor->getSavePaletteCallbacks().add(this,&RayCastingVis::savePaletteCallback);
     RenderSettingDlg = createRenderSettingDlg();
+    PointCloudsDlg = createPointCloudsSettingDlg();
 
     //initial interface parameter
     ambinetCoE = 0.6;
@@ -542,7 +561,9 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 
     //Debug Report
      std::cout<<"Construct RayCastingVis"<<std::endl;
-    const unsigned int sDataSize[3] = {pointCloudSize,pointCloudSize,pointCloudSize};
+    int volumeTexSize = pointVolume->getVolumeSize(currentElement);
+    cout<<"current tex size: "<<volumeTexSize<<endl;
+    const unsigned int sDataSize[3] = {volumeTexSize,volumeTexSize,volumeTexSize};
     domain = Box(Point(-1,-1,-1),Point(1,1,1));
     renderDomain = Polyhedron<Scalar>(Polyhedron<Scalar>::Point(domain.min),Polyhedron<Scalar>::Point(domain.max));
 
@@ -826,6 +847,19 @@ void RayCastingVis::menuToggleSelectCallback(GLMotif::ToggleButton::ValueChanged
             {
             /* Close the render dialog: */
             Vrui::popdownPrimaryWidget(RenderSettingDlg);
+            }
+    }
+    else if(strcmp(cbData->toggle->getName(),"ShowPointCloudsToggle")==0)
+    {
+        if(cbData->set)
+            {
+            /* Open the render dialog at the same position as the main menu: */
+            Vrui::popupPrimaryWidget(PointCloudsDlg);
+            }
+        else
+            {
+            /* Close the render dialog: */
+            Vrui::popdownPrimaryWidget(PointCloudsDlg);
             }
     }
 }
