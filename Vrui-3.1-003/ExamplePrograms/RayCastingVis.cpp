@@ -39,6 +39,7 @@
 #include <GLMotif/PopupWindow.h>
 #include <GLMotif/RowColumn.h>
 #include <GLMotif/TextField.h>
+#include <GLMotif/ScrolledListBox.h>
 
 /************************************
 Methods of class Raycaster::DataItem:
@@ -312,11 +313,43 @@ GLMotif::PopupWindow* RayCastingVis::createPointCloudsSettingDlg(void)
     pointDialogPopup->getCloseCallbacks().add(this,&RayCastingVis::renderDialogCloseCallback);
 
     GLMotif::RowColumn* pointCloudsDialog=new GLMotif::RowColumn("PointCloudsDialog",pointDialogPopup,false);
-    pointCloudsDialog->setOrientation(GLMotif::RowColumn::VERTICAL);
+    pointCloudsDialog->setOrientation(GLMotif::RowColumn::HORIZONTAL);
     pointCloudsDialog->setPacking(GLMotif::RowColumn::PACK_TIGHT);
     pointCloudsDialog->setNumMinorWidgets(2);
 
+    /* Create a listbox containing all visualization elements: */
+    GLMotif::ScrolledListBox* scrolledElementList=new GLMotif::ScrolledListBox("ScrolledElementList",pointCloudsDialog,GLMotif::ListBox::MULTIPLE,20,10);
+    scrolledElementList->showHorizontalScrollBar(false);
+    elementList=scrolledElementList->getListBox();
+    UpdateElementList();
+//    elementList->getValueChangedCallbacks().add(this,&ElementList::elementListValueChangedCallback);
+//    elementList->getItemSelectedCallbacks().add(this,&ElementList::elementListItemSelectedCallback);
+
+    /* Create the button box: */
+    GLMotif::RowColumn* buttonBox=new GLMotif::RowColumn("ButtonBox",pointCloudsDialog,false);
+    buttonBox->setOrientation(GLMotif::RowColumn::HORIZONTAL);
+    buttonBox->setPacking(GLMotif::RowColumn::PACK_TIGHT);
+    buttonBox->setAlignment(GLMotif::Alignment::RIGHT);
+
+    GLMotif::Button* selectElementButton=new GLMotif::Button("SelectElementButton",buttonBox,"Select");
+    selectElementButton->getSelectCallbacks().add(this,&RayCastingVis::selectElementCallback);
+
+    GLMotif::Button* ClearButton=new GLMotif::Button("ClearElementButton",buttonBox,"Clear");
+    ClearButton->getSelectCallbacks().add(this,&RayCastingVis::clearElementCallback);
+    buttonBox->manageChild();
+
+    pointCloudsDialog->manageChild();
+
     return pointDialogPopup;
+}
+
+void RayCastingVis::UpdateElementList()
+{
+    vector<string>& elementNameList = pointVolume->GetElementList();
+    for(int i = 0; i< elementNameList.size(); i++)
+    {
+        elementList->addItem(elementNameList[i].c_str());
+    }
 }
 
 void RayCastingVis::initDataItem(RayCastingVis::DataItem* dataItem) const
@@ -441,7 +474,7 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
 //                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_FLOAT,volumeData.data());
           int volumedataSize = pointVolume->getVolumeSize(currentElement);
           glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,volumedataSize,volumedataSize,
-                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)pointVolume->getVolumeDataPtr(currentElement));
+                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)volumeDataPtr);
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -580,35 +613,39 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     domainExtent=Math::sqrt(domainExtent);
     cellSize=Math::sqrt(cellSize);
 
+
+
     // initial data
-    const char* datasetName = "/home/leo/src/Data/PointCloudVolume/Ga.raw";
-    int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
-    /*load sample data*/
-    volumeData.resize(volumesize);
-    volumeDataPtr = new float[volumesize];
-    std::ifstream ifs(datasetName, std::ios::binary);
+    vector<string> initialelementVisList;
+    initialelementVisList.push_back("Ca");
+    volumeDataPtr = pointVolume->GetMultipleVolumeData(initialelementVisList);
 
-    std::cout<<"open dataset file "<<datasetName<<std::endl;
-    if(!ifs.is_open())
-      {
-        /* fail to open dataset file */
-        Misc::throwStdErr("fail to open dataset file:");
-        return;
-      }
-    ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize*sizeof(float));
-//    ifs.read(reinterpret_cast<char *>(volumeDataPtr), volumesize*sizeof(float));
-    ifs.close();
+//    const char* datasetName = "/home/leo/src/Data/PointCloudVolume/Ga.raw";
+//    int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
 
-    std::cout<<"volumedata: "<<volumeData.front()<<" volumedatasize: "<<volumeData.size()<<std::endl;
-//    std::cout<<"volumedata: "<<volumeDataPtr[0]<<" volumedatasize: "<<sizeof(volumeDataPtr)<<std::endl;
-    int vdnum;
-    for(int i = 0; i< volumeData.size();i++)
-        if(volumeData[i]>0)
-        {
+//    volumeData.resize(volumesize);
+//    volumeDataPtr = new float[volumesize];
+//    std::ifstream ifs(datasetName, std::ios::binary);
+
+//    std::cout<<"open dataset file "<<datasetName<<std::endl;
+//    if(!ifs.is_open())
+//      {
+//        /* fail to open dataset file */
+//        Misc::throwStdErr("fail to open dataset file:");
+//        return;
+//      }
+//    ifs.read(reinterpret_cast<char *>(&volumeData.front()), volumesize*sizeof(float));
+//    ifs.close();
+
+//    std::cout<<"volumedata: "<<volumeData.front()<<" volumedatasize: "<<volumeData.size()<<std::endl;
+//    int vdnum;
+//    for(int i = 0; i< volumeData.size();i++)
+//        if(volumeData[i]>0)
+//        {
 //            cout<<volumeData[i]<<endl;
-            vdnum++;
-        }
-    cout<<"nonZero volume data: "<< vdnum<<endl;
+//            vdnum++;
+//        }
+//    cout<<"nonZero volume data: "<< vdnum<<endl;
 
     //data = new Voxel[dataSize[0]*dataSize[1]*dataSize[2]];
     dataVersion = 1;
@@ -952,6 +989,27 @@ void RayCastingVis::loadElementsCancelCallback(GLMotif::FileSelectionDialog::Can
     /* Destroy the file selection dialog: */
     Vrui::getWidgetManager()->deleteWidget(cbData->fileSelectionDialog);
     }
+
+void RayCastingVis::selectElementCallback(Misc::CallbackData *cbData)
+{
+    cout<<"select element update0"<<endl;
+    vector<string> selectedElement;
+    for(int i = 0; i < elementList->getNumItems(); i++)
+    {
+        if(elementList->isItemSelected(i))
+            selectedElement.push_back(elementList->getItem(i));
+    }
+
+    volumeDataPtr = pointVolume->GetMultipleVolumeData(selectedElement);
+    cout<<"select element update"<<endl;
+    updateData();
+}
+
+void RayCastingVis::clearElementCallback(Misc::CallbackData *cbData)
+{
+    elementList->clearSelection();
+    free(volumeDataPtr);
+}
 
 void RayCastingVis::bindPreIntShader(DataItem *dataItem) const
 {

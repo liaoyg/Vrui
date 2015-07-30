@@ -252,6 +252,30 @@ void PointCloudVis::GenerateElementIndex()
         }
 }
 
+float* PointCloudVis::GetMultipleVolumeData(vector<string> elementlist)
+{
+    vector<float*> volumeList;
+    int size = 0;
+    for(int i = 0; i< elementlist.size(); i++)
+    {
+        for(int j = 0; j < volumeDataList.size(); j++)
+            if(strcmp(volumeDataList[j].elementName.c_str(), elementlist[i].c_str()) == 0)
+            {
+                volumeList.push_back(volumeDataList[j].volumeData);
+                size = volumeDataList[j].maxSize;
+                break;
+            }
+    }
+    float* volumeRes = new float[size*size*size+1];
+    for(int i = 0; i<size*size*size+1; i++)
+    {
+        for(int j = 0; j< volumeList.size(); j++)
+            volumeRes[i] += volumeList[j][i];
+    }
+
+    return volumeRes;
+}
+
 PointCloudVis::PointCloudVis(const char* rangeFileName, const char* dataSrcFileName, int pointSize)
 {
 
@@ -297,6 +321,11 @@ int PointCloudVis::getVolumeSize(const string elementName)
             return maxSize;
         }
     }
+}
+
+vector<string>& PointCloudVis::GetElementList()
+{
+    return elementList;
 }
 
 void PointCloudVis::RefreshVolumeData(const int pointSize)

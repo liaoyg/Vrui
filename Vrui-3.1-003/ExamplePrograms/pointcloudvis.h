@@ -76,6 +76,8 @@ public:
     float* getVolumeDataPtr(const string elementName);
     int getVolumeSize(const string elementName);
     void RefreshVolumeData(const int pointSize);
+    vector<string>& GetElementList();
+    float* GetMultipleVolumeData(vector<string> elementlist);
 };
 
 #endif // POINTCLOUDVIS_H

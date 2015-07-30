@@ -119,4 +119,6 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/GLMotif/CascadeButton.h \
  /home/leo/Vrui-3.1/include/GLMotif/SubMenu.h \
  /home/leo/Vrui-3.1/include/GLMotif/Popup.h \
- /home/leo/Vrui-3.1/include/GLMotif/PopupMenu.h
+ /home/leo/Vrui-3.1/include/GLMotif/PopupMenu.h \
+ /home/leo/Vrui-3.1/include/GLMotif/ScrolledListBox.h \
+ /home/leo/Vrui-3.1/include/GLMotif/ScrollBar.h

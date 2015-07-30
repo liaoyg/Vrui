@@ -17,6 +17,7 @@
 #include <GLMotif/RadioBox.h>
 #include <GLMotif/Slider.h>
 #include <GLMotif/FileSelectionDialog.h>
+#include <GLMotif/ListBox.h>
 
 #include "Polyhedron.h"
 #include "PaletteEditor.h"
@@ -136,6 +137,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     GLMotif::PopupWindow* PointCloudsDlg;
     GLMotif::PopupWindow* ElementListDlg;
 
+    GLMotif::ListBox* elementList;
     PaletteEditor* transFuncEditor;
 
     /* Interface Parameter */
@@ -150,6 +152,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     GLMotif::PopupMenu* createMainMenu(void);
     GLMotif::PopupWindow* createRenderSettingDlg(void);
     GLMotif::PopupWindow* createPointCloudsSettingDlg(void);
+    void UpdateElementList();
 
     /* Protected methods: */
     protected:
@@ -217,6 +220,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
     void loadElementsCallback(Misc::CallbackData*);
     void loadElementsOKCallback(GLMotif::FileSelectionDialog::OKCallbackData* cbData);
     void loadElementsCancelCallback(GLMotif::FileSelectionDialog::CancelCallbackData* cbData);
+    void selectElementCallback(Misc::CallbackData* cbData);
+    void clearElementCallback(Misc::CallbackData* cbData);
 
     /* Pre Integreted transfer function Method*/
     void bindPreIntShader(DataItem* dataItem) const;
