@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define POLYHEDRON_INCLUDED
 
 #include <vector>
+#include "DataSetGrid.h"
+#include "IsoSurfaceExtractor.h"
 #include <Geometry/Point.h>
 
 /* Forward declarations: */

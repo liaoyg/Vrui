@@ -1,5 +1,6 @@
-$(OBJDIR)/pointcloudvis.o: pointcloudvis.cpp \
-  pointcloudvis.h  \
+$(OBJDIR)/DataFilter.o: DataFilter.cpp  \
+ DataFilter.h  \
+  pointcloudvis.h \
  /home/leo/Vrui-3.1/include/GL/GLColor.h  \
  /home/leo/Vrui-3.1/include/GL/GLScalarLimits.h \
  /home/leo/Vrui-3.1/include/Geometry/Point.h \
@@ -27,5 +28,4 @@ $(OBJDIR)/pointcloudvis.o: pointcloudvis.cpp \
  /home/leo/Vrui-3.1/include/Misc/PoolAllocator.h \
  /home/leo/Vrui-3.1/include/Misc/StandardHashFunction.h \
  /home/leo/Vrui-3.1/include/Misc/OneTimeQueue.h \
- /home/leo/Vrui-3.1/include/Misc/ChunkedArray.h  \
- 
+ /home/leo/Vrui-3.1/include/Misc/ChunkedArray.h

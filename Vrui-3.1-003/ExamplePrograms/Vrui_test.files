@@ -155,3 +155,17 @@ Animation.cpp
 pointcloudvis.h
 pointcloudvis.cpp
 PointCloudPreProcessor.cpp
+IsoSurfaceExtractor.h
+IsoSurfaceExtractor.cpp
+IsoSurface.h
+IsoSurface.cpp
+DataSetGrid.h
+DataSetGrid.cpp
+DataSetCell.h
+DataSetCell.cpp
+IsoSurfaceCaseTable.h
+IsoSurfaceCaseTable.cpp
+IndexedTriangleSet.h
+IndexedTriangleSet.cpp
+DataFilter.h
+DataFilter.cpp

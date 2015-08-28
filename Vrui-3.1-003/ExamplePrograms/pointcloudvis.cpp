@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace visualization {
+
 void PointCloudVis::InputRangeFile(const char *filename)
 {
      ifstream rangeFileInput(filename);
@@ -166,7 +168,7 @@ void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
     const int sizeZ = lengthZ*size/lengthX;
 //    const int sizeY = size;
 //    const int sizeZ = size;
-    cout<<"dataset size: "<<sizeX<<" "<<sizeY<<" "<<sizeZ<<endl;
+//    cout<<"dataset size: "<<sizeX<<" "<<sizeY<<" "<<sizeZ<<endl;
 
     VolumeDataNode tempNode;
 
@@ -205,7 +207,7 @@ void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
     int offsetX = (maxSize-sizeX)/2;
     int offsetY = (maxSize-sizeY)/2;
     int offsetZ = (maxSize-sizeZ)/2;
-    cout<<"offset size of volume: "<< offsetX<<" "<< offsetY<<" "<< offsetZ<<" "<<endl;
+//    cout<<"offset size of volume: "<< offsetX<<" "<< offsetY<<" "<< offsetZ<<" "<<endl;
 
     for(int i = 0; i < sizeX; i++)
         for(int j = 0; j < sizeY; j++)
@@ -230,7 +232,7 @@ void PointCloudVis::GenerateVolumeData(const int size, const string elementName)
     tempNode.volumeSizeZ = sizeZ;
     tempNode.maxSize = maxSize;
     volumeDataList.push_back(tempNode);
-    cout<<"nonzero: "<<nonZero<<endl;
+//    cout<<"nonzero: "<<nonZero<<endl;
 }\
 
 void PointCloudVis::GenerateElementIndex()
@@ -272,7 +274,7 @@ float* PointCloudVis::GetMultipleVolumeData(vector<string> elementlist)
         for(int j = 0; j< volumeList.size(); j++)
             volumeRes[i] += volumeList[j][i];
     }
-
+    volumeList.clear();
     return volumeRes;
 }
 
@@ -288,7 +290,7 @@ PointCloudVis::PointCloudVis(const char* rangeFileName, const char* dataSrcFileN
 
     for(int i = 0; i< elementList.size();i++)
     {
-        cout<<"generate volume data, element: "<<elementList[i]<<endl;
+//        cout<<"generate volume data, element: "<<elementList[i]<<endl;
         GenerateVolumeData(pointSize,elementList[i]);
     }
 
@@ -307,6 +309,15 @@ float* PointCloudVis::getVolumeDataPtr(const string elementName)
     {
         if(strcmp(volumeDataList[i].elementName.c_str(), elementName.c_str()) == 0)
             return volumeDataList[i].volumeData;
+    }
+}
+
+VolumeDataNode* PointCloudVis::getVolumeDataNode(const string elementName)
+{
+    for(int i = 0 ; i < volumeDataList.size(); i++)
+    {
+        if(strcmp(volumeDataList[i].elementName.c_str(), elementName.c_str()) == 0)
+            return &volumeDataList[i];
     }
 }
 
@@ -332,10 +343,13 @@ void PointCloudVis::RefreshVolumeData(const int pointSize)
 {
     if(pointSize != pointVolumeSize)
     {
+        volumeDataList.clear();
         for(int i = 0; i< elementList.size();i++)
         {
             cout<<"generate volume data, element: "<<elementList[i]<<endl;
             GenerateVolumeData(pointSize,elementList[i]);
         }
     }
+}
+
 }

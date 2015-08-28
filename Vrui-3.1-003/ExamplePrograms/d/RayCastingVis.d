@@ -76,13 +76,18 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/GLMotif/DropdownBox.h \
  /home/leo/Vrui-3.1/include/GLMotif/GlyphGadget.h \
  /home/leo/Vrui-3.1/include/GLMotif/PopupWindow.h Polyhedron.h \
- PaletteEditor.h ColorMap.h pointcloudvis.h  \
- /home/leo/Vrui-3.1/include/Misc/FileNameExtensions.h \
- /home/leo/Vrui-3.1/include/Misc/CreateNumberedFileName.h \
- /home/leo/Vrui-3.1/include/GL/GLContextData.h \
+ DataSetGrid.h DataSetCell.h IsoSurfaceExtractor.h IsoSurfaceCaseTable.h \
+ IndexedTriangleSet.h /home/leo/Vrui-3.1/include/GL/GLVertex.h \
+ /home/leo/Vrui-3.1/include/GL/GLVertexArrayParts.h \
  /home/leo/Vrui-3.1/include/Misc/HashTable.h \
  /home/leo/Vrui-3.1/include/Misc/PoolAllocator.h \
  /home/leo/Vrui-3.1/include/Misc/StandardHashFunction.h \
+ /home/leo/Vrui-3.1/include/Misc/OneTimeQueue.h \
+ /home/leo/Vrui-3.1/include/Misc/ChunkedArray.h PaletteEditor.h \
+ ColorMap.h pointcloudvis.h DataFilter.h  \
+ /home/leo/Vrui-3.1/include/Misc/FileNameExtensions.h \
+ /home/leo/Vrui-3.1/include/Misc/CreateNumberedFileName.h \
+ /home/leo/Vrui-3.1/include/GL/GLContextData.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexShader.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBVertexProgram.h \
  /home/leo/Vrui-3.1/include/GL/Extensions/GLARBDepthTexture.h \

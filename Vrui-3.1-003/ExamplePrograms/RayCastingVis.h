@@ -22,6 +22,8 @@
 #include "Polyhedron.h"
 #include "PaletteEditor.h"
 #include "pointcloudvis.h"
+#include "DataSetGrid.h"
+#include "DataFilter.h"
 
 /* Forward declarations: */
 namespace GLMotif {
@@ -36,6 +38,14 @@ class ToggleButton;
 namespace Misc {
 class CallbackData;
 }
+
+namespace visualization {
+class PointCloudVis;
+class DataSetGrid;
+class IsoSurfaceExtractor;
+class IndexedTriangleSet;
+class DataFilter;
+}
 class RayCastingVis:public Vrui::Application,public GLObject
     {
     /* Embedded classes: */
@@ -47,6 +57,10 @@ class RayCastingVis:public Vrui::Application,public GLObject
     typedef Geometry::Plane<Scalar,3> Plane;
     typedef Geometry::ProjectiveTransformation<Scalar,3> PTransform;
     typedef GLubyte Voxel; // Type for voxel data
+    typedef visualization::PointCloudVis PointDataSet;
+    typedef visualization::IsoSurfaceExtractor ISExtrctor;
+    typedef visualization::DataSetGrid DataSetGrid;
+    typedef visualization::DataFilter DataFilter;
 
     protected:
     struct DataItem:public GLObject::DataItem // Structure containing per-context state
@@ -109,10 +123,14 @@ class RayCastingVis:public Vrui::Application,public GLObject
     protected:
     std::vector<float> volumeData;
     float* volumeDataPtr;
-    PointCloudVis* pointVolume;
+    PointDataSet* pointVolume;
+    ISExtrctor* iSExtrctor;
+    DataSetGrid* dataSetGrid;
+    ISExtrctor::Isosurface* isosurface;
     string currentElement;
     int pointCloudSize;
     Voxel* data;
+    DataFilter* dataFilter;
     unsigned int dataVersion; // Version number of the volume dataset to track changes
     GLColorMap* colorMap; // Pointer to the color map
     GLfloat transparencyGamma; // Adjustment factor for color map's overall opacity

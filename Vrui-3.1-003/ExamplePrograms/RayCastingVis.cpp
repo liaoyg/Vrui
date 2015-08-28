@@ -317,13 +317,29 @@ GLMotif::PopupWindow* RayCastingVis::createPointCloudsSettingDlg(void)
     pointCloudsDialog->setPacking(GLMotif::RowColumn::PACK_TIGHT);
     pointCloudsDialog->setNumMinorWidgets(2);
 
+    GLMotif::RowColumn* augmentSetting=new GLMotif::RowColumn("augmentSettingBox",pointCloudsDialog,false);
+    augmentSetting->setOrientation(GLMotif::RowColumn::HORIZONTAL);
+    GLMotif::RowColumn* augmentSettingLeft=new GLMotif::RowColumn("augmentSettingBoxLeft",augmentSetting,false);
+    augmentSettingLeft->setOrientation(GLMotif::RowColumn::HORIZONTAL);
     /* Create a listbox containing all visualization elements: */
-    GLMotif::ScrolledListBox* scrolledElementList=new GLMotif::ScrolledListBox("ScrolledElementList",pointCloudsDialog,GLMotif::ListBox::MULTIPLE,20,10);
+    GLMotif::ScrolledListBox* scrolledElementList=new GLMotif::ScrolledListBox("ScrolledElementList",augmentSettingLeft,GLMotif::ListBox::MULTIPLE,20,10);
     scrolledElementList->showHorizontalScrollBar(false);
     elementList=scrolledElementList->getListBox();
     UpdateElementList();
 //    elementList->getValueChangedCallbacks().add(this,&ElementList::elementListValueChangedCallback);
 //    elementList->getItemSelectedCallbacks().add(this,&ElementList::elementListItemSelectedCallback);
+    augmentSettingLeft->manageChild();
+
+    GLMotif::RowColumn* augmentSettingRight=new GLMotif::RowColumn("augmentSettingBoxRight",augmentSetting,false);
+    augmentSettingRight->setOrientation(GLMotif::RowColumn::VERTICAL);
+    new GLMotif::Label("VolumeSize",augmentSettingRight,"Volume Size");
+
+    GLMotif::Slider* volumeSizeSlider=new GLMotif::Slider("volumeSizeSlider",augmentSettingRight,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    volumeSizeSlider->setValueRange(0.0,200.0,1.0);
+    volumeSizeSlider->setValue(pointCloudSize);
+    volumeSizeSlider->getValueChangedCallbacks().add(this,&RayCastingVis::renderDlgSlideChangeCallback);
+    augmentSettingRight->manageChild();
+    augmentSetting->manageChild();
 
     /* Create the button box: */
     GLMotif::RowColumn* buttonBox=new GLMotif::RowColumn("ButtonBox",pointCloudsDialog,false);
@@ -473,8 +489,9 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
 //         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
 //                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_FLOAT,volumeData.data());
           int volumedataSize = pointVolume->getVolumeSize(currentElement);
+          dataFilter->MedianFilter(volumeDataPtr,volumedataSize);
           glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,volumedataSize,volumedataSize,
-                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)volumeDataPtr);
+                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)dataFilter->GetFiltedData());
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -575,8 +592,20 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
         }
     }
 //    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
-    pointVolume = new PointCloudVis(rangeFileName, dataSrcFileName, pointCloudSize);
+    pointVolume = new PointDataSet(rangeFileName, dataSrcFileName, pointCloudSize);
     currentElement = "Ca";
+//    dataSetGrid = new DataSetGrid;
+//    dataSetGrid->Initialization(pointVolume->getVolumeDataNode(currentElement));
+
+//    iSExtrctor = new ISExtrctor(dataSetGrid);
+//    Cluster::MulticastPipe* pipe=Vrui::openPipe();
+//    isosurface = new ISExtrctor::Isosurface(0);
+//    iSExtrctor->ExtractIsoSurface(0.5f,*isosurface);
+//    std::cout<<"isosurface triangle num: "<<iSExtrctor->getSurface()->getNumTriangles()<<std::endl;
+    //initial Data Filter
+    dataFilter = new DataFilter;
+//    dataFilter->MedianFilter(pointVolume->getVolumeDataNode(currentElement));
+
 
     //initial interface
     mainMenu = createMainMenu();
@@ -738,10 +767,11 @@ void RayCastingVis::initContext(GLContextData& contextData) const
 
 void DrawTriangle()
 {
+    glColor3f(1.0,1.0,0.0);
     glBegin(GL_TRIANGLES);
-        glVertex2f(0.0f,1.0f);
-        glVertex2f(-1.0f,-1.0f);
-        glVertex2f(1.0f,-1.0f);
+        glVertex3f(0.0f,1.0f,0.0f);
+        glVertex3f(-1.0f,-1.0f,0.0f);
+        glVertex3f(1.0f,-1.0f,0.0f);
     glEnd();
 }
 
@@ -781,6 +811,11 @@ void RayCastingVis::glRenderAction(GLContextData& contextData) const
     glCullFace(GL_FRONT);
     clippedDomain->drawFaces();
 
+    //render isoSurface
+//    std::cout<<"render isosurface"<<std::endl;
+//    iSExtrctor->getSurface()->glRenderAction(contextData);
+
+//    DrawTriangle();
     /* Unbind the depth framebuffer: */
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,currentFramebuffer);
 
@@ -860,7 +895,7 @@ void RayCastingVis::TransferFuncEditorCallback(Misc::CallbackData *cbData)
 {
     transFuncEditor->exportColorMap(*colorMap);
     //Debug Report
-     std::cout<<"export ColorMap"<<std::endl;
+//     std::cout<<"export ColorMap"<<std::endl;
     Vrui::requestUpdate();
 }
 void RayCastingVis::menuToggleSelectCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData)
@@ -942,6 +977,11 @@ void RayCastingVis::renderDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCa
         stepSize = cbData->value;
         std::cout<<"set step size"<<std::endl;
     }
+    else if(strcmp(cbData->slider->getName(),"volumeSizeSlider")==0)
+    {
+        pointCloudSize = cbData->value;
+        std::cout<<"set pointCloud Volume size"<<std::endl;
+    }
 }
 
 void RayCastingVis::renderDlgToggleChangeCallback(GLMotif::ToggleButton::ValueChangedCallbackData *cbData)
@@ -999,9 +1039,10 @@ void RayCastingVis::selectElementCallback(Misc::CallbackData *cbData)
         if(elementList->isItemSelected(i))
             selectedElement.push_back(elementList->getItem(i));
     }
-
+    pointVolume->RefreshVolumeData(pointCloudSize);
     volumeDataPtr = pointVolume->GetMultipleVolumeData(selectedElement);
-    cout<<"select element update"<<endl;
+    //multiple element has same point size, pick the first element as current element
+    currentElement = selectedElement[0];
     updateData();
 }
 

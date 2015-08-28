@@ -174,7 +174,13 @@ $(EXEDIR)/RayCastingVis: $(OBJDIR)/RayCastingVis.o \
                          $(OBJDIR)/Polyhedron.o \
 			 $(OBJDIR)/ColorMap.o \
 			 $(OBJDIR)/PaletteEditor.o \
-			 $(OBJDIR)/pointcloudvis.o
+			 $(OBJDIR)/pointcloudvis.o \
+			 $(OBJDIR)/IsoSurfaceExtractor.o \
+			 $(OBJDIR)/DataSetGrid.o \
+			 $(OBJDIR)/DataSetCell.o \
+			 $(OBJDIR)/IsoSurfaceCaseTable.o\
+			 $(OBJDIR)/IndexedTriangleSet.o \
+			 $(OBJDIR)/DataFilter.o \
 
 #
 # There's always room for Jell-O!

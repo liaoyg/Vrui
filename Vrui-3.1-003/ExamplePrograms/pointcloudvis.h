@@ -8,8 +8,13 @@
 #include <Geometry/Box.h>
 #include <Vrui/DisplayState.h>
 
+#include "IsoSurfaceExtractor.h"
+
 
 using namespace std;
+
+namespace visualization {
+
 
 struct ElementNode
 {
@@ -55,6 +60,7 @@ public:
     typedef Geometry::Point<Scalar,2> Point2D;
     typedef Geometry::Point<Scalar,3> Point;
     typedef Geometry::Box<Scalar,3> Box;
+    typedef string ElementName;
 private:
     vector<IonNode> IonRangeList;
     vector<DensityNode> elementDensityMap;
@@ -64,6 +70,7 @@ private:
     vector<string> elementList;
 //    std::vector<unsigned char> volumeData;
     int pointVolumeSize;
+    ElementName curElementName;
 
     void InputRangeFile(const char* filename);
     void LoadPosData(const char* filename);
@@ -78,6 +85,12 @@ public:
     void RefreshVolumeData(const int pointSize);
     vector<string>& GetElementList();
     float* GetMultipleVolumeData(vector<string> elementlist);
+    void SetCurrentElementName(ElementName name)
+    {
+        curElementName = name;
+    }
+    VolumeDataNode* getVolumeDataNode(const string elementName);
 };
 
+}
 #endif // POINTCLOUDVIS_H
