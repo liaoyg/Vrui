@@ -55,8 +55,6 @@ RayCastingVis::DataItem::DataItem(void)
      depthSamplerLoc(-1),depthMatrixLoc(-1),depthSizeLoc(-1),
      eyePositionLoc(-1),stepSizeLoc(-1)
     {
-    //Debug Report
-     std::cout<<"construct DataItem "<<std::endl;
     /* Check for the required OpenGL extensions: */
     if(!GLShader::isSupported())
         Misc::throwStdErr("GPURaycasting::initContext: Shader objects not supported by local OpenGL");
@@ -485,13 +483,15 @@ void RayCastingVis::bindShader(const RayCastingVis::PTransform& pmv,const RayCas
         /* Upload the new volume data: */
         //Debug Report
          std::cout<<"Update volume texture version"<<dataVersion<<std::endl;
-          std::cout<<"bind datasize: "<<volumeData.size()<<" "<<dataSize[2]<<" "<<dataSize[0]<<" "<<dataSize[1]<<" "<< dataItem->textureSize[0]<<" "<< dataItem->textureSize[1]<<" "<< dataItem->textureSize[2]<<std::endl;
+//          std::cout<<"bind datasize: "<<volumeData.size()<<" "<<dataSize[2]<<" "<<dataSize[0]<<" "<<dataSize[1]<<" "<< dataItem->textureSize[0]<<" "<< dataItem->textureSize[1]<<" "<< dataItem->textureSize[2]<<std::endl;
 //         glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,dataItem->textureSize[0],dataItem->textureSize[1],
 //                  dataItem->textureSize[2],0,GL_LUMINANCE,GL_FLOAT,volumeData.data());
-          int volumedataSize = pointVolume->getVolumeSize(currentElement);
-          dataFilter->MedianFilter(volumeDataPtr,volumedataSize);
+          int volumedataSize = dataGrids->GetVolumeDataSize();
+//          dataFilter->MedianFilter(volumeDataPtr,volumedataSize);
+//          glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,volumedataSize,volumedataSize,
+//                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)dataFilter->GetFiltedData());
           glTexImage3DEXT(GL_TEXTURE_3D,0,GL_INTENSITY,volumedataSize,volumedataSize,
-                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)dataFilter->GetFiltedData());
+                   volumedataSize,0,GL_LUMINANCE,GL_FLOAT,(GLvoid*)volumeDataPtr);
 
         /* Mark the volume texture as up-to-date: */
         dataItem->volumeTextureVersion=dataVersion;
@@ -594,13 +594,22 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 //    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
     pointVolume = new PointDataSet(rangeFileName, dataSrcFileName, pointCloudSize);
     currentElement = "Ca";
+    currentElementList.push_back(currentElement);
+
+//    int gridSize = 100;
+    gridSizeHasChanged = false;
+    dataGrids = new PointDataGrid(pointCloudSize);
+    dataGrids->Initialization(pointVolume->getBoundingBox());
+    dataGrids->GridPointCloud(pointVolume);
+    dataGrids->CalculateEleVolumeDataWithFilter(currentElementList);
+
 //    dataSetGrid = new DataSetGrid;
 //    dataSetGrid->Initialization(pointVolume->getVolumeDataNode(currentElement));
 
 //    iSExtrctor = new ISExtrctor(dataSetGrid);
 //    Cluster::MulticastPipe* pipe=Vrui::openPipe();
-//    isosurface = new ISExtrctor::Isosurface(0);
-//    iSExtrctor->ExtractIsoSurface(0.5f,*isosurface);
+//    isosurface = new Surface(0);
+//    iSExtrctor->ExtractIsoSurface(0.5f,isosurface);
 //    std::cout<<"isosurface triangle num: "<<iSExtrctor->getSurface()->getNumTriangles()<<std::endl;
     //initial Data Filter
     dataFilter = new DataFilter;
@@ -647,7 +656,8 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     // initial data
     vector<string> initialelementVisList;
     initialelementVisList.push_back("Ca");
-    volumeDataPtr = pointVolume->GetMultipleVolumeData(initialelementVisList);
+//    volumeDataPtr = pointVolume->GetMultipleVolumeData(initialelementVisList);
+    volumeDataPtr = dataGrids->GetCurVolumeData();
 
 //    const char* datasetName = "/home/leo/src/Data/PointCloudVolume/Ga.raw";
 //    int volumesize = dataSize[0]*dataSize[1]*dataSize[2];
@@ -691,6 +701,7 @@ RayCastingVis::~RayCastingVis(void)
     {
 //    delete[] data;
     delete pointVolume;
+    delete dataGrids;
     }
 
 void RayCastingVis::setStepSize(RayCastingVis::Scalar newStepSize)
@@ -706,6 +717,9 @@ void RayCastingVis::initContext(GLContextData& contextData) const
     /* Create a new data item: */
     DataItem* dataItem=new DataItem;
     contextData.addDataItem(this,dataItem);
+
+    //initial isosurface
+//    isosurface->initContext(contextData);
 
     /* Initialize the data item: */
     initDataItem(dataItem);
@@ -777,8 +791,6 @@ void DrawTriangle()
 
 void RayCastingVis::glRenderAction(GLContextData& contextData) const
     {
-    //Debug Report
-//     std::cout<<"Start gl render action "<<std::endl;
     /* Get the OpenGL-dependent application data from the GLContextData object: */
     DataItem* dataItem=contextData.retrieveDataItem<DataItem>(this);
 
@@ -886,8 +898,6 @@ void RayCastingVis::frame()
 
 void RayCastingVis::display(GLContextData &contextData) const
 {
-    //Debug Report
-//     std::cout<<"Start Display"<<std::endl;
     glRenderAction(contextData);
 }
 
@@ -980,6 +990,7 @@ void RayCastingVis::renderDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCa
     else if(strcmp(cbData->slider->getName(),"volumeSizeSlider")==0)
     {
         pointCloudSize = cbData->value;
+        gridSizeHasChanged = true;
         std::cout<<"set pointCloud Volume size"<<std::endl;
     }
 }
@@ -1032,17 +1043,27 @@ void RayCastingVis::loadElementsCancelCallback(GLMotif::FileSelectionDialog::Can
 
 void RayCastingVis::selectElementCallback(Misc::CallbackData *cbData)
 {
-    cout<<"select element update0"<<endl;
+    cout<<"select element update"<<endl;
     vector<string> selectedElement;
     for(int i = 0; i < elementList->getNumItems(); i++)
     {
         if(elementList->isItemSelected(i))
             selectedElement.push_back(elementList->getItem(i));
     }
-    pointVolume->RefreshVolumeData(pointCloudSize);
-    volumeDataPtr = pointVolume->GetMultipleVolumeData(selectedElement);
+    if(gridSizeHasChanged)
+    {
+        dataGrids->ResizeVolumeData(pointCloudSize);
+        dataGrids->GridPointCloud(pointVolume);
+        gridSizeHasChanged = false;
+    }
+    dataGrids->CalculateEleVolumeDataWithFilter(selectedElement);
+    volumeDataPtr = dataGrids->GetCurVolumeData();
+
     //multiple element has same point size, pick the first element as current element
-    currentElement = selectedElement[0];
+    if(!selectedElement.empty())
+        currentElement = selectedElement[0];
+    else
+        currentElement = "";
     updateData();
 }
 

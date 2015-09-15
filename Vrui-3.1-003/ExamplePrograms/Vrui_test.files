@@ -169,3 +169,5 @@ IndexedTriangleSet.h
 IndexedTriangleSet.cpp
 DataFilter.h
 DataFilter.cpp
+PointCloudGrid.h
+PointCloudGrid.cpp

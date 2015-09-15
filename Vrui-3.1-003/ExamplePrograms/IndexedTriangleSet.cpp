@@ -189,6 +189,7 @@ void IndexedTriangleSet::initContext(
     GLContextData& contextData) const
     {
     /* Create a new context data item: */
+    std::cout<<"indexed triangle initContext"<<std::endl;
     DataItem* dataItem=new DataItem;
     contextData.addDataItem(this,dataItem);
     }
@@ -334,9 +335,10 @@ void IndexedTriangleSet::flush(void)
 void IndexedTriangleSet::glRenderAction(
     GLContextData& contextData) const
     {
+cout<<"glrender test"<<endl;
     /* Get the context data item: */
     DataItem* dataItem=contextData.template retrieveDataItem<DataItem>(this);
-
+//cout<<"glrender test"<<(int)numTriangles<<" "<<(int)numVertices<<endl;
     /* Save the current number of vertices and triangles (for parallel creation and rendering): */
     size_t numRenderTriangles=numTriangles;
     size_t numRenderVertices=numVertices;
@@ -390,6 +392,8 @@ void IndexedTriangleSet::glRenderAction(
         }
 
     dataItem->version=version;
+
+    cout<<"start draw triangle"<<endl;
 
     /* Render the triangles: */
     glVertexPointer(static_cast<const Vertex*>(0));

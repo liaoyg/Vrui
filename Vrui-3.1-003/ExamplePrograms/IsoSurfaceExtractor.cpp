@@ -15,9 +15,14 @@ IsoSurfaceExtractor::~IsoSurfaceExtractor()
 
 }
 
-void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface& newIsoSurface)
+void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface* newIsoSurface)
 {
-    isosurface = &newIsoSurface;
+    if(newIsoSurface == NULL)
+    {
+        cout<<"triangle set is null"<<endl;
+        return;
+    }
+    isosurface = newIsoSurface;
     isoValue = newIsoValue;
 
     size_t numCells = dataset->getTotalNumCells();
@@ -59,6 +64,8 @@ void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface
             }
         }
     isosurface->flush();
+
+//    cout<<"isosurface vertices num"<<isosurface->getNumVertices()<<endl;
 
     /* Clean up: */
     isosurface=0;

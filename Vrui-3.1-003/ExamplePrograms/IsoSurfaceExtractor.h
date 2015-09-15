@@ -51,7 +51,7 @@ public:
     IsoSurfaceExtractor(DataSetGrid* sDataSet);
     ~IsoSurfaceExtractor();
 
-    void ExtractIsoSurface(const Scalar newIsoValue, Isosurface& newIsoSurface);
+    void ExtractIsoSurface(const Scalar newIsoValue, Isosurface* newIsoSurface);
     Isosurface* getSurface()
     {
         return isosurface;

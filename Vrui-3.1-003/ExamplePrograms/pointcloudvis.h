@@ -85,11 +85,17 @@ public:
     void RefreshVolumeData(const int pointSize);
     vector<string>& GetElementList();
     float* GetMultipleVolumeData(vector<string> elementlist);
+    int FindMaxSizeofThree(int x, int y, int z);
     void SetCurrentElementName(ElementName name)
     {
         curElementName = name;
     }
     VolumeDataNode* getVolumeDataNode(const string elementName);
+    Box getBoundingBox()
+    {
+        return boundingBox;
+    }
+    vector<DensityNode>& GetDensityMap();
 };
 
 }

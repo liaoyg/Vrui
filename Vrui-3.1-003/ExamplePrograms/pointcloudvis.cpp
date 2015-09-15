@@ -148,10 +148,11 @@ void PointCloudVis::LoadPosData(const char* filename)
         }
 
         elementDensityMap.push_back(tempNode);
+
     }while(!inputFile.eof());
 }
 
-int FindMaxSizeofThree(int x, int y, int z)
+int PointCloudVis::FindMaxSizeofThree(int x, int y, int z)
 {
     int max = x > y ? x:y;
     max = max > z ? max:z;
@@ -337,6 +338,11 @@ int PointCloudVis::getVolumeSize(const string elementName)
 vector<string>& PointCloudVis::GetElementList()
 {
     return elementList;
+}
+
+vector<DensityNode>& PointCloudVis::GetDensityMap()
+{
+    return elementDensityMap;
 }
 
 void PointCloudVis::RefreshVolumeData(const int pointSize)

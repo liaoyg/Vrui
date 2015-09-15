@@ -181,6 +181,7 @@ $(EXEDIR)/RayCastingVis: $(OBJDIR)/RayCastingVis.o \
 			 $(OBJDIR)/IsoSurfaceCaseTable.o\
 			 $(OBJDIR)/IndexedTriangleSet.o \
 			 $(OBJDIR)/DataFilter.o \
+			 $(OBJDIR)/PointCloudGrid.o \
 
 #
 # There's always room for Jell-O!

@@ -84,7 +84,7 @@ $(OBJDIR)/RayCastingVis.o: RayCastingVis.cpp \
  /home/leo/Vrui-3.1/include/Misc/StandardHashFunction.h \
  /home/leo/Vrui-3.1/include/Misc/OneTimeQueue.h \
  /home/leo/Vrui-3.1/include/Misc/ChunkedArray.h PaletteEditor.h \
- ColorMap.h pointcloudvis.h DataFilter.h  \
+ ColorMap.h pointcloudvis.h DataFilter.h PointCloudGrid.h \
  /home/leo/Vrui-3.1/include/Misc/FileNameExtensions.h \
  /home/leo/Vrui-3.1/include/Misc/CreateNumberedFileName.h \
  /home/leo/Vrui-3.1/include/GL/GLContextData.h \

@@ -24,6 +24,7 @@
 #include "pointcloudvis.h"
 #include "DataSetGrid.h"
 #include "DataFilter.h"
+#include "PointCloudGrid.h"
 
 /* Forward declarations: */
 namespace GLMotif {
@@ -61,6 +62,8 @@ class RayCastingVis:public Vrui::Application,public GLObject
     typedef visualization::IsoSurfaceExtractor ISExtrctor;
     typedef visualization::DataSetGrid DataSetGrid;
     typedef visualization::DataFilter DataFilter;
+    typedef visualization::IndexedTriangleSet Surface;
+    typedef visualization::PointCloudGrid PointDataGrid;
 
     protected:
     struct DataItem:public GLObject::DataItem // Structure containing per-context state
@@ -124,10 +127,13 @@ class RayCastingVis:public Vrui::Application,public GLObject
     std::vector<float> volumeData;
     float* volumeDataPtr;
     PointDataSet* pointVolume;
+    PointDataGrid* dataGrids;
+    bool gridSizeHasChanged;
     ISExtrctor* iSExtrctor;
     DataSetGrid* dataSetGrid;
-    ISExtrctor::Isosurface* isosurface;
+    Surface* isosurface;
     string currentElement;
+    vector<string> currentElementList;
     int pointCloudSize;
     Voxel* data;
     DataFilter* dataFilter;
