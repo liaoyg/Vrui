@@ -18,6 +18,7 @@
 #include <GLMotif/Slider.h>
 #include <GLMotif/FileSelectionDialog.h>
 #include <GLMotif/ListBox.h>
+#include <GLMotif/Button.h>
 
 #include "Polyhedron.h"
 #include "PaletteEditor.h"
@@ -35,6 +36,9 @@ class PopupWindow;
 class RowColumn;
 class TextField;
 class ToggleButton;
+class Slidar;
+class Button;
+class ListBox;
 }
 namespace Misc {
 class CallbackData;
@@ -60,7 +64,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     typedef GLubyte Voxel; // Type for voxel data
     typedef visualization::PointCloudVis PointDataSet;
     typedef visualization::IsoSurfaceExtractor ISExtrctor;
-    typedef visualization::DataSetGrid DataSetGrid;
+//    typedef visualization::DataSetGrid DataSetGrid;
     typedef visualization::DataFilter DataFilter;
     typedef visualization::IndexedTriangleSet Surface;
     typedef visualization::PointCloudGrid PointDataGrid;
@@ -130,7 +134,9 @@ class RayCastingVis:public Vrui::Application,public GLObject
     PointDataGrid* dataGrids;
     bool gridSizeHasChanged;
     ISExtrctor* iSExtrctor;
-    DataSetGrid* dataSetGrid;
+//    DataSetGrid* dataSetGrid;
+    bool showIsoSurfaceFlag;
+    float isoValue;
     Surface* isosurface;
     string currentElement;
     vector<string> currentElementList;
@@ -156,10 +162,12 @@ class RayCastingVis:public Vrui::Application,public GLObject
     GLMotif::ToggleButton* showRenderSettiingToggle; // Toggle button to show the render setting dialog
     GLMotif::ToggleButton* PhongReflectionToggle; // Toggle button to control phong shading lighting
     GLMotif::ToggleButton* showPointCloudSetteingToggle;
+    GLMotif::ToggleButton* showIsoSurfaceSettingToggle; // Toggle button to control iso surface rendering
 
     GLMotif::PopupWindow* RenderSettingDlg;
     GLMotif::PopupWindow* PointCloudsDlg;
     GLMotif::PopupWindow* ElementListDlg;
+    GLMotif::PopupWindow* IsoSurfaceDlg;
 
     GLMotif::ListBox* elementList;
     PaletteEditor* transFuncEditor;
@@ -176,6 +184,7 @@ class RayCastingVis:public Vrui::Application,public GLObject
     GLMotif::PopupMenu* createMainMenu(void);
     GLMotif::PopupWindow* createRenderSettingDlg(void);
     GLMotif::PopupWindow* createPointCloudsSettingDlg(void);
+    GLMotif::PopupWindow* createIsoSurfaceSettingDlg(void);
     void UpdateElementList();
 
     /* Protected methods: */
@@ -246,6 +255,10 @@ class RayCastingVis:public Vrui::Application,public GLObject
     void loadElementsCancelCallback(GLMotif::FileSelectionDialog::CancelCallbackData* cbData);
     void selectElementCallback(Misc::CallbackData* cbData);
     void clearElementCallback(Misc::CallbackData* cbData);
+    void isoSurfaceDlgToggleChangeCallback(GLMotif::ToggleButton::ValueChangedCallbackData* cbData);
+    void isoSurfaceDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCallbackData* cbData);
+    void isoSurfaceDialogCloseCallback(Misc::CallbackData* cbData);
+    void isoSurfaceDialogButtonClickCallback(GLMotif::Button::CallbackData* cbData);
 
     /* Pre Integreted transfer function Method*/
     void bindPreIntShader(DataItem* dataItem) const;

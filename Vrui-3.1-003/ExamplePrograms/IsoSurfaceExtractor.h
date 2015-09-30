@@ -1,8 +1,8 @@
 #ifndef ISOSURFACEEXTRACTOR_H
 #define ISOSURFACEEXTRACTOR_H
 
-#include "DataSetCell.h"
-#include "DataSetGrid.h"
+#include "PointCloudGrid.h"
+#include "pointcloudvis.h"
 #include "IsoSurfaceCaseTable.h"
 #include "IndexedTriangleSet.h"
 
@@ -41,15 +41,16 @@ public:
 
 private:
     ExtractionMode extractionmode;
-    DataSetGrid* dataset;
+    PointCloudGrid* dataset;
     Isosurface* isosurface;
     Scalar isoValue;
 //    VertexIndexHasher vertexIndices; // Hasher mapping edge IDs to vertex indices in the isosurface
 
 
 public:
-    IsoSurfaceExtractor(DataSetGrid* sDataSet);
+    IsoSurfaceExtractor(PointCloudGrid* sDataSet);
     ~IsoSurfaceExtractor();
+    void SetNewDataSetGrid(PointCloudGrid* sDataSet);
 
     void ExtractIsoSurface(const Scalar newIsoValue, Isosurface* newIsoSurface);
     Isosurface* getSurface()

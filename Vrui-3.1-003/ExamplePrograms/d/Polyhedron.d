@@ -11,11 +11,15 @@ $(OBJDIR)/Polyhedron.o: Polyhedron.cpp  \
  /home/leo/Vrui-3.1/include/Geometry/HitResult.h \
  /home/leo/Vrui-3.1/include/Math/Constants.h \
   IsoSurfaceExtractor.h \
- IsoSurfaceCaseTable.h IndexedTriangleSet.h  \
- /home/leo/Vrui-3.1/include/GL/GLObject.h \
- /home/leo/Vrui-3.1/include/GL/GLVertex.h \
- /home/leo/Vrui-3.1/include/GL/GLColor.h \
+ PointCloudGrid.h pointcloudvis.h /home/leo/Vrui-3.1/include/GL/GLColor.h \
  /home/leo/Vrui-3.1/include/GL/GLScalarLimits.h \
+ /home/leo/Vrui-3.1/include/Vrui/DisplayState.h \
+ /home/leo/Vrui-3.1/include/Geometry/OrthogonalTransformation.h \
+ /home/leo/Vrui-3.1/include/Geometry/HVector.h \
+ /home/leo/Vrui-3.1/include/Geometry/Rotation.h \
+ /home/leo/Vrui-3.1/include/Vrui/Geometry.h IsoSurfaceCaseTable.h \
+ IndexedTriangleSet.h /home/leo/Vrui-3.1/include/GL/GLObject.h \
+ /home/leo/Vrui-3.1/include/GL/GLVertex.h \
  /home/leo/Vrui-3.1/include/GL/GLVector.h \
  /home/leo/Vrui-3.1/include/GL/GLVertexArrayParts.h \
  /home/leo/Vrui-3.1/include/Misc/HashTable.h \
@@ -25,9 +29,7 @@ $(OBJDIR)/Polyhedron.o: Polyhedron.cpp  \
  /home/leo/Vrui-3.1/include/Misc/ChunkedArray.h  \
  /home/leo/Vrui-3.1/include/Geometry/Plane.h \
  /home/leo/Vrui-3.1/include/Geometry/Matrix.h \
- /home/leo/Vrui-3.1/include/Geometry/HVector.h \
  /home/leo/Vrui-3.1/include/GL/GLGeometryWrappers.h \
- /home/leo/Vrui-3.1/include/Geometry/Rotation.h \
  /home/leo/Vrui-3.1/include/GL/GLTexCoordTemplates.h \
  /home/leo/Vrui-3.1/include/GL/GLNormalTemplates.h \
  /home/leo/Vrui-3.1/include/GL/GLVertexTemplates.h \

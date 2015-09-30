@@ -239,6 +239,9 @@ GLMotif::PopupMenu* RayCastingVis::createMainMenu(void)
     showPointCloudSetteingToggle = new GLMotif::ToggleButton("ShowPointCloudsToggle",mainMenu,"Point Clouds Setting Dialog");
     showPointCloudSetteingToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
 
+    showIsoSurfaceSettingToggle=new GLMotif::ToggleButton("ShowIsoSurfaceToggle",mainMenu,"Show Isosurface");
+    showIsoSurfaceSettingToggle->getValueChangedCallbacks().add(this,&RayCastingVis::menuToggleSelectCallback);
+
     mainMenu->manageChild();
 
     return mainMenuPopup;
@@ -255,7 +258,7 @@ GLMotif::PopupWindow* RayCastingVis::createRenderSettingDlg(void)
     GLMotif::RowColumn* renderDialog=new GLMotif::RowColumn("RenderDialog",renderDialogPopup,false);
     renderDialog->setOrientation(GLMotif::RowColumn::VERTICAL);
     renderDialog->setPacking(GLMotif::RowColumn::PACK_TIGHT);
-    renderDialog->setNumMinorWidgets(2);
+//    renderDialog->setNumMinorWidgets(2);
 
     GLMotif::ToggleButton* showSurfaceToggle=new GLMotif::ToggleButton("lightFlag",renderDialog,"Phong Shading");
     showSurfaceToggle->setBorderWidth(0.0f);
@@ -355,6 +358,52 @@ GLMotif::PopupWindow* RayCastingVis::createPointCloudsSettingDlg(void)
     pointCloudsDialog->manageChild();
 
     return pointDialogPopup;
+}
+
+GLMotif::PopupWindow* RayCastingVis::createIsoSurfaceSettingDlg(void)
+{
+    const GLMotif::StyleSheet& ss=*Vrui::getWidgetManager()->getStyleSheet();
+
+    GLMotif::PopupWindow* isosurfaceDialogPopup=new GLMotif::PopupWindow("IsosurfaceDialogPopup",Vrui::getWidgetManager(),"Isosurface Settings");
+    isosurfaceDialogPopup->setResizableFlags(true,false);
+    isosurfaceDialogPopup->setCloseButton(true);
+    isosurfaceDialogPopup->getCloseCallbacks().add(this,&RayCastingVis::isoSurfaceDialogCloseCallback);
+
+    GLMotif::RowColumn* settingLayout=new GLMotif::RowColumn("settingLayout",isosurfaceDialogPopup,false);
+    settingLayout->setOrientation(GLMotif::RowColumn::VERTICAL);
+    settingLayout->setPacking(GLMotif::RowColumn::PACK_TIGHT);
+//    settingLayout->setNumMinorWidgets(2);
+
+    GLMotif::ToggleButton* showIsosurfaceSurfaceToggle=new GLMotif::ToggleButton("isosurfaceFlag",settingLayout,"Show Isosurface");
+    showIsosurfaceSurfaceToggle->setBorderWidth(0.0f);
+    showIsosurfaceSurfaceToggle->setMarginWidth(0.0f);
+    showIsosurfaceSurfaceToggle->setHAlignment(GLFont::Left);
+    showIsosurfaceSurfaceToggle->setToggle(LightFlag);
+    showIsosurfaceSurfaceToggle->getValueChangedCallbacks().add(this,&RayCastingVis::isoSurfaceDlgToggleChangeCallback);
+
+    new GLMotif::Label("isoValueLabel",settingLayout,"IsoValue");
+
+    GLMotif::Slider* isoValueSlider=new GLMotif::Slider("IsoValueSlider",settingLayout,GLMotif::Slider::HORIZONTAL,ss.fontHeight*5.0f);
+    isoValueSlider->setValueRange(0.0,1.0,0.001);
+    isoValueSlider->setValue(diffuseCoE);
+    isoValueSlider->getValueChangedCallbacks().add(this,&RayCastingVis::isoSurfaceDlgSlideChangeCallback);
+
+    settingLayout->manageChild();
+
+    /* Create the button box: */
+    GLMotif::RowColumn* buttonBox=new GLMotif::RowColumn("ButtonBox",settingLayout,false);
+    buttonBox->setOrientation(GLMotif::RowColumn::HORIZONTAL);
+    buttonBox->setPacking(GLMotif::RowColumn::PACK_TIGHT);
+    buttonBox->setAlignment(GLMotif::Alignment::RIGHT);
+
+    GLMotif::Button* okElementButton=new GLMotif::Button("OKButton",buttonBox,"OK");
+    okElementButton->getSelectCallbacks().add(this,&RayCastingVis::isoSurfaceDialogButtonClickCallback);
+
+    GLMotif::Button* cancelButton=new GLMotif::Button("CancelButton",buttonBox,"Cancel");
+    cancelButton->getSelectCallbacks().add(this,&RayCastingVis::isoSurfaceDialogButtonClickCallback);
+    buttonBox->manageChild();
+
+    return isosurfaceDialogPopup;
 }
 
 void RayCastingVis::UpdateElementList()
@@ -565,12 +614,12 @@ Polyhedron<RayCastingVis::Scalar>* RayCastingVis::clipDomain(const RayCastingVis
 RayCastingVis::RayCastingVis(int& argc, char**& argv)
     :Vrui::Application(argc,argv),
      domainExtent(0),cellSize(0),stepSize(2),
-     mainMenu(0),transFuncEditor(0)
+     mainMenu(0),transFuncEditor(0),showIsoSurfaceFlag(false)
     {
     //Load datasrc path
     const char* rangeFileName=0;
     const char* dataSrcFileName = 0;
-    pointCloudSize = 100;
+
     for(int i=1;i<argc;++i)
         {
         /* Check if the current command line argument is a switch or a file name: */
@@ -591,29 +640,25 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
             }
         }
     }
-//    std::cout<<rangeFileName<<" + "<<dataSrcFileName<<std::endl;
+    //initial point set augment
+    pointCloudSize = 100;
+    isoValue = 0.5;
+
     pointVolume = new PointDataSet(rangeFileName, dataSrcFileName, pointCloudSize);
     currentElement = "Ca";
     currentElementList.push_back(currentElement);
 
-//    int gridSize = 100;
     gridSizeHasChanged = false;
     dataGrids = new PointDataGrid(pointCloudSize);
     dataGrids->Initialization(pointVolume->getBoundingBox());
     dataGrids->GridPointCloud(pointVolume);
     dataGrids->CalculateEleVolumeDataWithFilter(currentElementList);
 
-//    dataSetGrid = new DataSetGrid;
-//    dataSetGrid->Initialization(pointVolume->getVolumeDataNode(currentElement));
-
-//    iSExtrctor = new ISExtrctor(dataSetGrid);
-//    Cluster::MulticastPipe* pipe=Vrui::openPipe();
-//    isosurface = new Surface(0);
-//    iSExtrctor->ExtractIsoSurface(0.5f,isosurface);
-//    std::cout<<"isosurface triangle num: "<<iSExtrctor->getSurface()->getNumTriangles()<<std::endl;
-    //initial Data Filter
-    dataFilter = new DataFilter;
-//    dataFilter->MedianFilter(pointVolume->getVolumeDataNode(currentElement));
+    dataGrids->GridCubeCells();
+    iSExtrctor = new ISExtrctor(dataGrids);
+    Cluster::MulticastPipe* pipe=Vrui::openPipe();
+    isosurface = new Surface(0);
+    iSExtrctor->ExtractIsoSurface(isoValue,isosurface);
 
 
     //initial interface
@@ -624,6 +669,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
 //    transFuncEditor->getSavePaletteCallbacks().add(this,&RayCastingVis::savePaletteCallback);
     RenderSettingDlg = createRenderSettingDlg();
     PointCloudsDlg = createPointCloudsSettingDlg();
+    IsoSurfaceDlg = createIsoSurfaceSettingDlg();
 
     //initial interface parameter
     ambinetCoE = 0.6;
@@ -631,7 +677,6 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     diffuseCoE = 0.5;
 
     //Debug Report
-     std::cout<<"Construct RayCastingVis"<<std::endl;
     int volumeTexSize = pointVolume->getVolumeSize(currentElement);
     cout<<"current tex size: "<<volumeTexSize<<endl;
     const unsigned int sDataSize[3] = {volumeTexSize,volumeTexSize,volumeTexSize};
@@ -656,7 +701,6 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
     // initial data
     vector<string> initialelementVisList;
     initialelementVisList.push_back("Ca");
-//    volumeDataPtr = pointVolume->GetMultipleVolumeData(initialelementVisList);
     volumeDataPtr = dataGrids->GetCurVolumeData();
 
 //    const char* datasetName = "/home/leo/src/Data/PointCloudVolume/Ga.raw";
@@ -719,7 +763,7 @@ void RayCastingVis::initContext(GLContextData& contextData) const
     contextData.addDataItem(this,dataItem);
 
     //initial isosurface
-//    isosurface->initContext(contextData);
+    isosurface->initContext(contextData);
 
     /* Initialize the data item: */
     initDataItem(dataItem);
@@ -825,7 +869,8 @@ void RayCastingVis::glRenderAction(GLContextData& contextData) const
 
     //render isoSurface
 //    std::cout<<"render isosurface"<<std::endl;
-//    iSExtrctor->getSurface()->glRenderAction(contextData);
+    if(showIsoSurfaceFlag)
+        isosurface->glRenderAction(contextData);
 
 //    DrawTriangle();
     /* Unbind the depth framebuffer: */
@@ -944,6 +989,19 @@ void RayCastingVis::menuToggleSelectCallback(GLMotif::ToggleButton::ValueChanged
             Vrui::popdownPrimaryWidget(PointCloudsDlg);
             }
     }
+    else if(strcmp(cbData->toggle->getName(),"ShowIsoSurfaceToggle")==0)
+    {
+        if(cbData->set)
+            {
+            /* Open the render dialog at the same position as the main menu: */
+            Vrui::popupPrimaryWidget(IsoSurfaceDlg);
+            }
+        else
+            {
+            /* Close the render dialog: */
+            Vrui::popupPrimaryWidget(IsoSurfaceDlg);
+            }
+    }
 }
 void RayCastingVis::savePaletteCallback(Misc::CallbackData* cbData)
 {
@@ -999,10 +1057,57 @@ void RayCastingVis::renderDlgToggleChangeCallback(GLMotif::ToggleButton::ValueCh
 {
     if(strcmp(cbData->toggle->getName(),"lightFlag")==0)
     {
-        LightFlag=cbData->set;
-        std::cout<<"Light Setting change"<<std::endl;
+        if(cbData->set)
+            LightFlag = true;
+        else
+            LightFlag = false;
+        std::cout<<"Light Setting change"<<LightFlag<<std::endl;
     }
 
+}
+
+void RayCastingVis::isoSurfaceDlgSlideChangeCallback(GLMotif::Slider::ValueChangedCallbackData *cbData)
+{
+    if(strcmp(cbData->slider->getName(),"IsoValueSlider")==0)
+    {
+        isoValue = cbData->value;
+        iSExtrctor->ExtractIsoSurface(isoValue,isosurface);
+        std::cout<<"set isovalue"<<isoValue<<std::endl;
+    }
+}
+
+void RayCastingVis::isoSurfaceDlgToggleChangeCallback(GLMotif::ToggleButton::ValueChangedCallbackData *cbData)
+{
+    if(strcmp(cbData->toggle->getName(),"isosurfaceFlag")==0)
+    {
+        if(cbData->set)
+            showIsoSurfaceFlag = true;
+        else
+            showIsoSurfaceFlag = false;
+        std::cout<<"Isosurface show flag change: "<<showIsoSurfaceFlag<<std::endl;
+    }
+}
+
+void RayCastingVis::isoSurfaceDialogCloseCallback(Misc::CallbackData *cbData)
+{
+
+}
+
+void RayCastingVis::isoSurfaceDialogButtonClickCallback(GLMotif::Button::CallbackData *cbData)
+{
+    if(strcmp(cbData->button->getName(),"OKButton")==0)
+    {
+        iSExtrctor->ExtractIsoSurface(isoValue,isosurface);
+        showIsoSurfaceSettingToggle->setToggle(false);
+        Vrui::popdownPrimaryWidget(IsoSurfaceDlg);
+        std::cout<<"OK-isosurfaceDlg"<<std::endl;
+    }
+    else if(strcmp(cbData->button->getName(),"CancelButton")==0)
+    {
+        showIsoSurfaceSettingToggle->setToggle(false);
+        Vrui::popdownPrimaryWidget(IsoSurfaceDlg);
+        std::cout<<"Cancel-isosurfaceDlg "<<std::endl;
+    }
 }
 
 void RayCastingVis::loadElementsCallback(Misc::CallbackData*)

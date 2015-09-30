@@ -8,9 +8,6 @@
 #include <Geometry/Box.h>
 #include <Vrui/DisplayState.h>
 
-#include "IsoSurfaceExtractor.h"
-
-
 using namespace std;
 
 namespace visualization {

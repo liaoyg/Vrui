@@ -25,6 +25,7 @@ class PointCloudGrid
 public:
     typedef float Scalar;
     typedef Geometry::Box<Scalar,3> Box;
+    typedef vector<DataSetCell>::iterator cellitr;
 private:
     int gridSize;
     int sizeX;
@@ -40,7 +41,8 @@ private:
     Box boundingBox;
     vector<PointGridCell*> GridCells;
 
-    vector<DataSetCell> cellList;
+    int cubeCellNum;
+    vector<DataSetCell> cubeCellList;
 
     int testct;
 
@@ -58,6 +60,8 @@ public:
     void CalculateEleVolumeData(vector<string> elenameList);
     void CalculateEleVolumeDataWithFilter(vector<string> elenameList);
     void GridPointCloud(PointCloudVis* points);
+    void GridCubeCells();
+    Vertex CalculateCellPosition(int x, int y, int z);
     void ResizeVolumeData(int size);
     int GetVolumeDataSize()
     {
@@ -68,7 +72,18 @@ public:
     {
         return EleIntensityVolumeData;
     }
-
+    int GetCubeCellNum()
+    {
+        return cubeCellNum;
+    }
+    cellitr beginCells()
+    {
+        return cubeCellList.begin();
+    }
+    cellitr lastCells()
+    {
+        return cubeCellList.end();
+    }
 };
 }
 #endif // POINTCLOUDGRID_H

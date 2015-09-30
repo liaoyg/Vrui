@@ -3,7 +3,7 @@
 namespace visualization {
 
 
-IsoSurfaceExtractor::IsoSurfaceExtractor( DataSetGrid* sDataSet)
+IsoSurfaceExtractor::IsoSurfaceExtractor( PointCloudGrid* sDataSet)
     :extractionmode(FLAT),dataset(sDataSet),isosurface(0),
       isoValue(0)
 {
@@ -15,8 +15,14 @@ IsoSurfaceExtractor::~IsoSurfaceExtractor()
 
 }
 
+void IsoSurfaceExtractor::SetNewDataSetGrid(PointCloudGrid *sDataSet)
+{
+    dataset = sDataSet;
+}
+
 void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface* newIsoSurface)
 {
+    cout<<"Start Extract Isosurface"<<endl;
     if(newIsoSurface == NULL)
     {
         cout<<"triangle set is null"<<endl;
@@ -25,7 +31,9 @@ void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface
     isosurface = newIsoSurface;
     isoValue = newIsoValue;
 
-    size_t numCells = dataset->getTotalNumCells();
+    isosurface->clear();
+
+    size_t numCells = dataset->GetCubeCellNum();
     DataSetGrid::cellitr cIt = dataset->beginCells();
 
     std::cout<<"total cell Num: "<< numCells<<std::endl;
@@ -65,7 +73,7 @@ void IsoSurfaceExtractor::ExtractIsoSurface(const Scalar newIsoValue, Isosurface
         }
     isosurface->flush();
 
-//    cout<<"isosurface vertices num"<<isosurface->getNumVertices()<<endl;
+    cout<<"Finish Extract Isosurface. Triangle Num: "<<isosurface->getNumTriangles()<<endl;
 
     /* Clean up: */
     isosurface=0;

@@ -14,7 +14,7 @@ PointGridCell::PointGridCell(int x, int y, int z)
 
 
 PointCloudGrid::PointCloudGrid(int size)
-    :gridSize(size)
+    :gridSize(size),cubeCellNum(0)
 {
     EleIntensityVolumeData = 0;
     testct = 100;
@@ -259,4 +259,40 @@ void PointCloudGrid::GridPointCloud(PointCloudVis *points)
     }
 }
 
+void PointCloudGrid::GridCubeCells()
+{
+    for(int k = 0;k < sizeZ-1; ++k)
+        for(int j = 0;j < sizeY-1; ++j)
+            for(int i = 0;i < sizeX-1; ++i)
+            {
+                DataSetCell* cell = new DataSetCell;
+                cell->addVertex(CalculateCellPosition(i,j,k));
+                cell->addVertex(CalculateCellPosition(i+1,j,k));
+                cell->addVertex(CalculateCellPosition(i,j,k+1));
+                cell->addVertex(CalculateCellPosition(i+1,j,k+1));
+                cell->addVertex(CalculateCellPosition(i,j+1,k));
+                cell->addVertex(CalculateCellPosition(i+1,j+1,k));
+                cell->addVertex(CalculateCellPosition(i,j+1,k+1));
+                cell->addVertex(CalculateCellPosition(i+1,j+1,k+1));
+                cell->adjustEdgePoint();
+                cubeCellList.push_back(*cell);
+                cubeCellNum++;
+            }
+}
+Vertex PointCloudGrid::CalculateCellPosition(int x, int y, int z)
+{
+    int offsetX = (maxSize-sizeX)/2;
+    int offsetY = (maxSize-sizeY)/2;
+    int offsetZ = (maxSize-sizeZ)/2;
+    float intensity = EleIntensityVolumeData[x + offsetX + (y+offsetY) * maxSize + (z+offsetZ) * maxSize * maxSize];
+    Vertex vertex;
+    vertex.x = (float)(x+offsetX)*2.0/maxSize - 1;
+    vertex.y = (float)(y+offsetY)*2.0/maxSize - 1;
+    vertex.z = (float)(z+offsetZ)*2.0/maxSize - 1;
+    if(intensity > 0)
+        vertex.intensity = intensity;
+    else
+        intensity = 0;
+    return vertex;
+}
 }

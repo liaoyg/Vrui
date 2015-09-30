@@ -335,7 +335,6 @@ void IndexedTriangleSet::flush(void)
 void IndexedTriangleSet::glRenderAction(
     GLContextData& contextData) const
     {
-cout<<"glrender test"<<endl;
     /* Get the context data item: */
     DataItem* dataItem=contextData.template retrieveDataItem<DataItem>(this);
 //cout<<"glrender test"<<(int)numTriangles<<" "<<(int)numVertices<<endl;
@@ -392,8 +391,6 @@ cout<<"glrender test"<<endl;
         }
 
     dataItem->version=version;
-
-    cout<<"start draw triangle"<<endl;
 
     /* Render the triangles: */
     glVertexPointer(static_cast<const Vertex*>(0));
