@@ -100,7 +100,7 @@ void IsoSurfaceExtractor::ExtractFlatIsoSurface(DataSetCell& cell)
             /* Calculate intersection point on the edge: */
             float vi0 = cell.getEdgeEndPointValue(edge,0);
             float vi1 = cell.getEdgeEndPointValue(edge,1);
-//            cout<<"endPoint value: "<<vi0<<" "<<vi1<<endl;
+//            cout<<"endPoint value: "<<vi0<<" "<<vi1<<"isovalue:"<<isoValue<<endl;
             float w1=(isoValue-vi0)/(vi1-vi0);
             edgeVertices[edge]=cell.calEdgePointPosition(edge,w1);
 //            std::cout<<"edge num:"<<edge<<" value position:"<<w1<<" point:"<<edgeVertices[edge][0]<<" "<<edgeVertices[edge][1]<<" "<<edgeVertices[edge][2]<<std::endl;

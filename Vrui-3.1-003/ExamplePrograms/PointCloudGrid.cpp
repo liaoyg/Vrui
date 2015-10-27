@@ -35,7 +35,6 @@ void PointCloudGrid::Initialization(Box bBox){
     sizeY = lengthY*gridSize/lengthX;
     sizeZ = lengthZ*gridSize/lengthX;
 
-
     for(int i = 0;i < sizeZ; ++i)
         for(int j = 0;j < sizeY; ++j)
             for(int k = 0;k < sizeX; ++k)
@@ -47,7 +46,6 @@ void PointCloudGrid::Initialization(Box bBox){
     maxSize = sizeX > sizeY?(sizeX>sizeZ?sizeX:sizeZ):(sizeY>sizeZ?sizeY:sizeZ);
     EleIntensityVolumeData = new float[maxSize*maxSize*maxSize+1];
     memset(EleIntensityVolumeData,0,(maxSize*maxSize*maxSize+1)*sizeof(float));
-
 }
 
 void PointCloudGrid::ResizeVolumeData(int size)

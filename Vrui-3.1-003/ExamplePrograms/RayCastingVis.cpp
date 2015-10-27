@@ -641,7 +641,7 @@ RayCastingVis::RayCastingVis(int& argc, char**& argv)
         }
     }
     //initial point set augment
-    pointCloudSize = 100;
+    pointCloudSize = 50;
     isoValue = 0.5;
 
     pointVolume = new PointDataSet(rangeFileName, dataSrcFileName, pointCloudSize);
